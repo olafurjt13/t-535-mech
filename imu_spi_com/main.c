@@ -20,6 +20,7 @@ int main(){
 	asm("sei");
 	USART_init(MYUBRR);
 	SPI_MasterInit();
+	IMU_init();
 	char acc_data[6];
 
 	while(1){

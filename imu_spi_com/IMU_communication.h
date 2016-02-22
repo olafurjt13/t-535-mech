@@ -13,5 +13,6 @@
 void SPI_MasterInit(void);
 void SPI_MasterTransmit(char cData);
 void IMU_read_acc(char *accBuffer);
+void IMU_init();
 
 #endif /* IMU_COMMUNICATION_H_ */
