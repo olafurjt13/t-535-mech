@@ -45,3 +45,13 @@ auto
 Thumbs.db
 resources
 *.DS_Store
+*.a
+*.dll
+*.dylib
+*.exe
+*.o
+*.obj
+*.so
+Debug
+Release
+.metadata

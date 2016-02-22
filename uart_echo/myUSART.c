@@ -14,7 +14,7 @@ void USART_init(unsigned int br){
 	UBRR0L = (unsigned char) br;
 
 	// Enabling Recieve (RXEN0) and transmit (TXEN0) and
-	// the RX/TX Complete Interrupt in the USART
+	// the RX Complete Interrupt in the USART
 	//Control and Status Register 0B
 	UCSR0B = (1 << RXEN0) | ( 1 << TXEN0 ) | ( 1 << RXCIE0);
 
@@ -33,9 +33,9 @@ void USART_Transmit(unsigned char data){
 	UDR0 = data;
 }
 
-
+// Don't need the USART_Receive function because the ISR takes care of reception
 /*
-unsigned char USART_Recieve(void){
+unsigned char USART_Receive(void){
 	// While the reception buffer is not empty (RXC0 flag in UCSR0A)
 	while( !(UCSR0A & (1<<RXC0)) ){
 		;

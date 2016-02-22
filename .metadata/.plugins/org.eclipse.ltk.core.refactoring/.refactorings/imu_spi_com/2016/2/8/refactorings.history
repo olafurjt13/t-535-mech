@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;imu_spi_com/spi_com.c&apos; to &apos;IMU_communication.c&apos;" description="Rename resource &apos;spi_com.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="spi_com.c" name="IMU_communication.c" stamp="1456145107830" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;imu_spi_com/spi_com.h&apos; to &apos;IMU_communication.h&apos;" description="Rename resource &apos;spi_com.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="spi_com.h" name="IMU_communication.h" stamp="1456145116055" updateReferences="true"/>
-</session>

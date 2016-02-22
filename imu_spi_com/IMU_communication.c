@@ -20,10 +20,7 @@
 #define CTRL_REG6_XL 0x20
 #define CTRL_REG7_XL 0x21
 #define CTRL_REG8 0x22
-#define CTRL_REG9 0x23
-#define CTRL_REG10 0x24
 #define INT_GEN_SRC_XL 0x25
-#define INT_GEN_SRC_XL 0x27
 #define STATUS_REG 0x27
 
 #define WHO_AM_I 0x0F
@@ -56,14 +53,31 @@ void SPI_MasterTransmit(char cData){
 }
 
 void IMU_init(){
-	unsigned char ctrlReg5 = ( 1 << ACC_Z ) | ( 1 << ACC_Y ) | ( 1 << ACC_X );
+	char ctrlReg5 = ( 1 << ACC_Z ) | ( 1 << ACC_Y ) | ( 1 << ACC_X );
 	char regAddress = CTRL_REG5_XL;
+
+	// Pull the SS line low to initiate transmission
+	PORTB |= ( 1 << SPI_SS );
+	// Send write address
 	SPI_MasterTransmit(regAddress);
+	// Send ctrlReg5 bit pattern to turn on X,Y,Z acceleration sensors
 	SPI_MasterTransmit(ctrlReg5);
 
-	unsigned char ctrlReg8 = ( 1 << IF_ADD_INC );
-	char payload = 0x80 | ctrlReg8;
-	SPI_MasterTransmit(payload);
+	// Pull the SS line high to end transmission
+	PORTB &= ~( 1 << SPI_SS );
+
+	char ctrlReg8 = ( 1 << IF_ADD_INC );
+	regAddress = ( 0x80 ) | CTRL_REG8;
+	// Pull the SS line low to initiate transmission
+	PORTB |= ( 1 << SPI_SS );
+
+	// Send write address
+	SPI_MasterTransmit(regAddress);
+	// Send ctrlReg8 bit pattern to turn auto increment registers on
+	SPI_MasterTransmit(ctrlReg8);
+
+	// Pull the SS line high to end transmission
+	PORTB &= ~ ( 1 << SPI_SS );
 }
 
 void IMU_read_acc(char *accBuffer){
