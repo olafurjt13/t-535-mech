@@ -1,0 +1,101 @@
+\documentclass[11pt,a4paper,titlepage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{courier}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage[toc, page]{appendix}
+
+
+
+
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+
+
+
+\lstset{ %
+	backgroundcolor=\color{white},   % choose the background color
+	basicstyle=\footnotesize,        % size of fonts used for the code
+	breaklines=true,                 % automatic line breaking only at whitespace
+	captionpos=b,                    % sets the caption-position to bottom
+	commentstyle=\color{mygreen},    % comment style
+	escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+	keywordstyle=\color{blue},       % keyword style
+	stringstyle=\color{mymauve},     % string literal style
+}
+
+%\renewcommand{\thesubsection}{\thesection.\alph{subsection}}
+
+
+\usepackage{booktabs}
+\usepackage[backend=biber, bibencoding=utf8, style=ieee]{biblatex}
+
+\addbibresource{references.bib}
+\usepackage[final,hidelinks]{hyperref} % must be last package loaded
+
+\author{Ólafur Jón Thoroddsen}  % My name, for the titlepage
+\title{\includegraphics{graphics/ru-logo}\\\vspace{10mm}
+	Mechatronics II\\T-535-MECH \ \\Homework 3}  % The title, for the titlepage
+
+\begin{document}
+	\pagenumbering{arabic}
+	\maketitle
+	
+\section{Homework}
+
+\subsection{The Microcontroller architecture}
+\noindent There are many things that make up a microcontroller. The following are some of the most important components.
+
+\textit{The Registers} are a specialized locations in memory that communicate data to the ALU which carries out logic operations. Data is loaded into the registers from RAM before it is possible to do any operations on it.
+
+\textit{RAM} or Random Access Memory is part of the data memory. It contains all local variables in a program which are stacked into it from the bottom up. When a program calls a subroutine or an interrupt happens, the memory addresses of the next instruction to be executed are also pushed onto \textit{the stack}, which is not the same as the one mentioned above for variables. This stack is created from the bottom up in the RAM.
+
+\textit{The Stack Pointer} is a combination of two registers in the \verb|I/O| space that always points to (that is, contains the memory address of) the top of \textit{the stack}. It is updated each time anything is pushed onto the stack (decremented) or popped off it (incremented).
+
+\textit{ROM} or Read Only Memory is a type of data memory that retains its contents even when no power is applied to the microcontroller. This type of memory is called non-volatile memory and it often requires special hardware to be able to write to it. Thus it is often used for firmware or other software that is not supposed to be accessed or changed by a general user.
+
+\textit{Interrupts} are events that stop the current processor activity to jump to a service routine which takes care of the event before returning to where it came from in memory. For an interrupt to happen, the global interrupt flag (I) must be enabled in the \textit{status register} and an interrupt bit of any specific interrupt must be on. This is useful with for example serial connections where the ISR can echo back transmitted data for verification.
+
+\textit{The Code Set} or \textit{Instructions Set} is a list of instructions and variables that the microcontroller knows about and how to execute the instructions or interpret the values of the variables. This is the key to be able to read AVR Assembly code.
+
+\textit{The Clock} source of a microcontroller is usually an oscillating crystal. It is very important to have a stable clock source to ensure that for example serial communication works correctly.
+
+\textit{The Program Counter} (PC) is a special register that points to the next instruction in memory to be executed. It is 14 bits long on the ATmega328p to be able to address its entire 16K of memory ($2^{14} \approx 16400$). When a program is being executed, the PC is continuously being changed to point to the next instruction.
+
+\textit{The Status Register} (SREG) is a special register that contains flags such as the interrupt enable flag (\verb|I|), a carry flag for adding numbers (\verb|C|) a zero flag (\verb|Z|) that becomes active when a subtraction results in a zero (used for equality testing) and more. The SREG is 8 bits in size so it contains 8 flags.
+
+\subsection{LED and Delay with interrupt}
+
+I wrote a program in C that controls an LED and uses an interrupt driven delay function using separate compilation in \verb|.h| and \verb|.c| files. A very long story short, this did not work as planned. I got everything to compile eventually but the functionality was not there. I have not been able to determine what excactly is causing the issues but long reading of the ATmega328p datasheet has not helped.
+
+\vspace{0.5cm}
+\lstinputlisting[label=main,caption=The main.c program,language=C,firstline=10,frame=single]{main.c}
+\vspace{0.5cm}
+
+\lstinputlisting[label=ledh,caption=The led.h file,language=C,firstline=9,frame=single]{led.h}
+
+\lstinputlisting[label=ledc,caption=The led.c file,language=C,firstline=10,frame=single]{led.c}
+
+\lstinputlisting[label=delayh,caption=The delay.h file,language=C,firstline=9,frame=single]{delay.h}
+
+\lstinputlisting[label=delayc,caption=The delay.c file,language=C,firstline=9,frame=single]{delay.c}
+
+\section{My project}
+
+This week I worked on the IMU, got it to output data over I$^2$C using the library supplied with it. Least to say it was plug and play.
+
+Any other progress is only contained in working on learning to code in C using Eclipse and trying to figure out how to use all these registers, instructions and all the bells and whistles.
+
+Thus the time plan for this week is to continue working on last weeks tasks, finish them, and then plan the rest of the project.
+\end{document}

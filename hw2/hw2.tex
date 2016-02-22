@@ -1,0 +1,125 @@
+\documentclass[11pt,a4paper,titlepage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{courier}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage[toc, page]{appendix}
+
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+
+
+
+\lstset{ %
+	backgroundcolor=\color{white},   % choose the background color
+	basicstyle=\footnotesize,        % size of fonts used for the code
+	breaklines=true,                 % automatic line breaking only at whitespace
+	captionpos=b,                    % sets the caption-position to bottom
+	commentstyle=\color{mygreen},    % comment style
+	escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+	keywordstyle=\color{blue},       % keyword style
+	stringstyle=\color{mymauve},     % string literal style
+}
+
+%\renewcommand{\thesubsection}{\thesection.\alph{subsection}}
+
+
+\usepackage{booktabs}
+\usepackage[backend=biber, bibencoding=utf8, style=ieee]{biblatex}
+
+\addbibresource{references.bib}
+\usepackage[final,hidelinks]{hyperref} % must be last package loaded
+
+\author{Ólafur Jón Thoroddsen}  % My name, for the titlepage
+\title{\includegraphics{graphics/ru-logo}\\\vspace{10mm}
+	Mechatronics II\\T-535-MECH \ \\Homework 2}  % The title, for the titlepage
+
+\begin{document}
+	\pagenumbering{arabic}
+	\maketitle
+	
+\section{Homework}
+
+\subsection{Number systems}
+
+To convert from positive decimal numbers to hex we follow this procedure: For a decimal number $a_\text{D}$
+\begin{enumerate}
+	\item Devide $a_\text{D}$ by $16_\text{D}$ and write down the remainder \textit{r}.\label{item:devide}
+	\item \textit{r} is the last digit in 0x\textit{a}. e.g. if $r = 2$ then the last digit in 0x\textit{a} is "2", if $r = 12_\text{D}$ then the last digit is 0xC.\label{item:hex}
+	\item Devide the quota from the division in step \ref{item:devide} by $16_\text{D}$ and repeat steps \ref{item:devide} and \ref{item:hex} recursively until the division only returns a remainder.
+\end{enumerate}
+
+\noindent To convert a negative decimal number to hex we follow this procedure: For a decimal number $a_\text{D}$
+\begin{enumerate}
+		\item Convert the absolute value of $a_\text{D}$ to binary by dividing by $2_\text{D}$, if the remainder is non-zero, the last digit is $1_\text{2}$\label{item:binarydiv}
+		\item Take the quota from the division in step~\ref{item:binarydiv} and repeat the division recursively until the quota is zero.
+		\item Now that we have $a_2$, apply 2's complement to obtain the negative of $a_2$. If the resulting number has a zero in the most significant bit, add $1111_2$ in front of the 2's complement of $a_2$ (it's like adding a nibble of zeros in front of the original number).
+		\item Now convert this number to hex, nibble by nibble.
+\end{enumerate}
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{cc}
+		\toprule
+		Decimal	&	Hex\\
+		\midrule
+		$1962_\text{D}$	&	0x7AA\\
+		$-13_\text{D}$	&	0xF3\\
+		$1.0_\text{D}$	&	0x3F800000\\
+		\bottomrule
+	\end{tabular}
+	\caption{Decimal to Hex conversion}
+	\label{tab:conversion}
+\end{table}
+
+\subsection{AVR Assembly}
+
+The AVR Assembler command BREQ stands for "Branch if Equal". It's function can be described by the following statement
+\begin{equation}
+	\text{if (}\text{Z} = 1) \text{ then PC} \leftarrow \text{PC}+\text{k}+1
+\end{equation}
+
+\noindent The command first tests if the Zero - flag in the status register (SREG) is set. If Z = 1, then it moves the program counter (PC) relative to its current position. This operation takes \(1/2\) a clock cycle to complete.
+The Zero flag is set by many instructions, for example the compare (\verb|CP|) instruction. It subtracts values of two registers from each other, if the result is zero, then the Zero flag is set and then \verb|BREQ| tests the flag and moves the program counter if Z = 1.
+
+\section{Process with my project}
+\subsection{Last week}
+This week I studied the dynamics of an inverted pendulum (IP), specifically a little bit simplified version called the Cart-Pole system which is a well studied apparatus. This is a first step in creating a dynamic model of my IP which I will use to create a control system to stabilize the robot. The analysis can be seen on pages 6-8 in my notebook. Further analysis is needed, that is one of the goals of the following week.
+
+I compared pros/cons of three types of motors. Brushed DC, brushless DC and stepper motors. I need to do further research to make a decision about what kind of motors are suitable for my project. At this point I'm leaning towards burshless DC. The comparison is available on page 9 in my notebook.
+
+I ordered and got a shipment of components with a DC motor controller, a stepper motor driver and an IMU sensor as well as an extra Arduino Uno to experiment with.
+
+\subsection{Next week}
+The major goals of next week is to complete the dynamic modeling of the IP, get advice on selecting motors, order the motors and hopefully start experimenting with them and a suitable motor controller.
+
+\begin{table}[H]
+		\centering
+		\begin{tabular}{clc}
+				\toprule
+				Work package no.	&	Description		&	Est. time to complete\\
+				\midrule
+				1	&	\begin{tabular}{@{}l@{}}Dynamic modeling.\\ Consult either \\ Andrei or Ármann\end{tabular}	&	4-5 hours	\\
+				\midrule
+				2	&	\begin{tabular}{@{}l@{}}Research what kinds\\ of motors are suitable\\ for this project\end{tabular}	&	3-4 hours	\\
+				\midrule
+				3	&	\begin{tabular}{@{}l@{}}Experiment with the\\ IMU sensor and\\ map it's behaviour\end{tabular}	& 3-4 hours\\
+				\bottomrule
+		\end{tabular}
+		\caption{Items to complete during 27 January to 3 February}
+\end{table}
+\pagebreak
+\printbibliography
+
+\end{document}

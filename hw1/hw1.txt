@@ -1,0 +1,37 @@
+Had to download the Java Development Kit.
+Installed at the default location
+
+Downloaded the Eclipse C/C++ 64bit for Mac OS X installer
+Installed at the default location
+
+Downloaded OSX-AVR from http://sourceforge.net/projects/osxavr/
+Installed at the default location
+
+In Eclipse, opened Eclipse -> Preferences, under AVR -> Paths, I entered custom paths:
+	AVR-GCC		/usr/local/bin
+	GNU make	/usr/bin
+	AVR Header Files	/usr/local/avr/include
+	AVRDude		/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin
+
+This probably needs to change. OSX-AVR uses an old version of the avr-gcc compiler but another program called CrossPack-AVR probably does the job. https://www.obdev.at/products/crosspack/index.html. Custom paths changed to:
+	AVR-GCC		/usr/local/CrossPack-AVR/bin
+	GNU make	/usr/bin
+	AVR Header Files	/usr/local/CrossPack-AVR/avr/include
+	AVRDude		/usr/local/CrossPack-AVR/bin
+
+
+To be able to create a new configuration for AVRDude I had to point it to the avrdude.conf file located in /Applications/Arduino.app/Contents/Java/hardware/tools/avr/etc/avrdude.conf
+
+Selected:
+	Programmer Hardware: Arduino
+	Override default port (-P): /dev/cu.usbmodem1411
+	Override default baudrate (-b): 115200
+
+
+Now blinking the LED on pin 13 from an Arduino sketch:
+	Freq = 94,7 kHz
+	Vpp = 5,52V
+
+Using Eclipse with a more optimized C code to perform exactly the same actions:
+	Freq = 1,22 MHz
+	Vpp = 5,60V

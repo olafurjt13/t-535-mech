@@ -1,0 +1,35 @@
+/*
+ * main.c
+ *
+ *  Created on: 20. feb. 2016
+ *      Author: olafurjonthoroddsen
+ */
+
+
+#include <avr/io.h>
+
+#include "IMU_communication.h"
+#include "myUSART.h"
+
+#define FOSC 16000000
+#define BAUD 9600
+#define MYUBRR FOSC/BAUD/16 - 1
+
+
+int main(){
+	asm("sei");
+	USART_init(MYUBRR);
+	SPI_MasterInit();
+	char acc_data[6];
+
+	while(1){
+		IMU_read_acc(acc_data);
+		//int acc_X = acc_data[0];
+		//acc_X |= (acc_data[1] << 8);
+		//USART_Transmit_byte_hex(acc_data[0]);
+		USART_Transmit('a');
+	}
+
+
+
+}

@@ -1,0 +1,141 @@
+
+blinkwithdelay.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .data         00000000  00800100  000000ec  00000160  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  1 .text         000000ec  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .stab         000004d4  00000000  00000000  00000160  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  3 .stabstr      00000bc3  00000000  00000000  00000634  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  4 .comment      00000011  00000000  00000000  000011f7  2**0
+                  CONTENTS, READONLY
+  5 .debug_aranges 00000020  00000000  00000000  00001208  2**3
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_info   000000be  00000000  00000000  00001228  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_abbrev 00000014  00000000  00000000  000012e6  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_line   00000058  00000000  00000000  000012fa  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 34 00 	jmp	0x68	; 0x68 <__ctors_end>
+   4:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+   8:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+   c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  10:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  14:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  18:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  1c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  20:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  24:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  28:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  2c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  30:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  34:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  38:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  3c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  40:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  44:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  48:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  4c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  50:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  54:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  58:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  5c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  60:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  64:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+
+00000068 <__ctors_end>:
+  68:	11 24       	eor	r1, r1
+  6a:	1f be       	out	0x3f, r1	; 63
+  6c:	cf ef       	ldi	r28, 0xFF	; 255
+  6e:	d8 e0       	ldi	r29, 0x08	; 8
+  70:	de bf       	out	0x3e, r29	; 62
+  72:	cd bf       	out	0x3d, r28	; 61
+  74:	0e 94 40 00 	call	0x80	; 0x80 <main>
+  78:	0c 94 74 00 	jmp	0xe8	; 0xe8 <_exit>
+
+0000007c <__bad_interrupt>:
+  7c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+00000080 <main>:
+#define LEDPIN 0b00010000
+
+#include <avr/io.h>
+
+
+int main(){
+  80:	cf 93       	push	r28
+  82:	df 93       	push	r29
+  84:	cd b7       	in	r28, 0x3d	; 61
+  86:	de b7       	in	r29, 0x3e	; 62
+	DDRB |= LEDPIN;			// Set pin 0x20 to be an output
+  88:	84 e2       	ldi	r24, 0x24	; 36
+  8a:	90 e0       	ldi	r25, 0x00	; 0
+  8c:	24 e2       	ldi	r18, 0x24	; 36
+  8e:	30 e0       	ldi	r19, 0x00	; 0
+  90:	f9 01       	movw	r30, r18
+  92:	20 81       	ld	r18, Z
+  94:	20 61       	ori	r18, 0x10	; 16
+  96:	fc 01       	movw	r30, r24
+  98:	20 83       	st	Z, r18
+	TCCR1B |= (( 1 << CS12 ) | ( 1 << CS10 ));	// Initialize a clock source with prescaling of 1024 at TimerCounterControlRegister 1B
+  9a:	81 e8       	ldi	r24, 0x81	; 129
+  9c:	90 e0       	ldi	r25, 0x00	; 0
+  9e:	21 e8       	ldi	r18, 0x81	; 129
+  a0:	30 e0       	ldi	r19, 0x00	; 0
+  a2:	f9 01       	movw	r30, r18
+  a4:	20 81       	ld	r18, Z
+  a6:	25 60       	ori	r18, 0x05	; 5
+  a8:	fc 01       	movw	r30, r24
+  aa:	20 83       	st	Z, r18
+	PORTB = LEDPIN;			// Turn on the LED
+  ac:	85 e2       	ldi	r24, 0x25	; 37
+  ae:	90 e0       	ldi	r25, 0x00	; 0
+  b0:	20 e1       	ldi	r18, 0x10	; 16
+  b2:	fc 01       	movw	r30, r24
+  b4:	20 83       	st	Z, r18
+	while(1){
+		if(TCNT1 > 156){		// If the TimerCounter register 1 reaches 15625 (1 second)
+  b6:	84 e8       	ldi	r24, 0x84	; 132
+  b8:	90 e0       	ldi	r25, 0x00	; 0
+  ba:	fc 01       	movw	r30, r24
+  bc:	80 81       	ld	r24, Z
+  be:	91 81       	ldd	r25, Z+1	; 0x01
+  c0:	8d 39       	cpi	r24, 0x9D	; 157
+  c2:	91 05       	cpc	r25, r1
+  c4:	80 f0       	brcs	.+32     	; 0xe6 <main+0x66>
+			PORTB ^= LEDPIN;	// Toggle the LED
+  c6:	85 e2       	ldi	r24, 0x25	; 37
+  c8:	90 e0       	ldi	r25, 0x00	; 0
+  ca:	25 e2       	ldi	r18, 0x25	; 37
+  cc:	30 e0       	ldi	r19, 0x00	; 0
+  ce:	f9 01       	movw	r30, r18
+  d0:	30 81       	ld	r19, Z
+  d2:	20 e1       	ldi	r18, 0x10	; 16
+  d4:	23 27       	eor	r18, r19
+  d6:	fc 01       	movw	r30, r24
+  d8:	20 83       	st	Z, r18
+			TCNT1 = 0;		// Reset the timer value
+  da:	84 e8       	ldi	r24, 0x84	; 132
+  dc:	90 e0       	ldi	r25, 0x00	; 0
+  de:	fc 01       	movw	r30, r24
+  e0:	11 82       	std	Z+1, r1	; 0x01
+  e2:	10 82       	st	Z, r1
+		}
+	}
+  e4:	e8 cf       	rjmp	.-48     	; 0xb6 <main+0x36>
+  e6:	e7 cf       	rjmp	.-50     	; 0xb6 <main+0x36>
+
+000000e8 <_exit>:
+  e8:	f8 94       	cli
+
+000000ea <__stop_program>:
+  ea:	ff cf       	rjmp	.-2      	; 0xea <__stop_program>
