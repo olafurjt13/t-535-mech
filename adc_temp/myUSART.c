@@ -15,9 +15,10 @@
 
 
 void USART_init(unsigned int br){
+	unsigned int ubrr = 16000000/16/br - 1;
 	// Settin Baud Rate to br
-	UBRR0H = (unsigned char) (br >> 8);
-	UBRR0L = (unsigned char) br;
+	UBRR0H = (unsigned char) (ubrr >> 8);
+	UBRR0L = (unsigned char) ubrr;
 
 	// Enabling Receive (RXEN0) and transmit (TXEN0) and
 	// the RX Complete Interrupt in the USART
@@ -108,6 +109,25 @@ void USART_Transmit_8_dec(unsigned char byte){
 		USART_Transmit(0x0A);
 	}
 }
+
+void USART_Transmit_16_dec(unsigned int word){
+	if(word < 10){
+		USART_Transmit(word + 48);
+		USART_Transmit(0x0A);
+	}
+	else if(word < 100){
+		USART_Transmit((word / 10) + 48);
+		USART_Transmit((word % 10) + 48);
+		USART_Transmit(0x0A);
+	}
+	else if(word < 1000){
+		USART_Transmit((word / 100) + 48);
+		USART_Transmit(((word - (word/100)*100) / 10) + 48);
+		USART_Transmit(((word - (word/100)*100) % 10) + 48);
+		USART_Transmit(0x0A);
+	}
+}
+
 
 void myPrint(unsigned char str[], unsigned char len){
 	for(unsigned char i = 0; i < len; i++){

@@ -19,6 +19,7 @@ void USART_Transmit_8_hex(unsigned char byte);
 void USART_Transmit_16_hex(int data16bit);
 void USART_Transmit_32_hex(long data32bit);
 void USART_Transmit_8_dec(unsigned char byte);
+void USART_Transmit_16_dec(unsigned int word);
 void myPrint(unsigned char str[], unsigned char len);
 
 volatile char rxBuffer;

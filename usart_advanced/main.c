@@ -19,18 +19,13 @@
 int main(){
 	asm("sei");
 	USART_init(MYUBRR);
-	unsigned long c = 50000;
 
-
+	unsigned char string[60] = "This is a string with multiple characters\0 null null null";
 	while(1){
 		if(dataReceived){
-			USART_Transmit_32_hex(c);
-//			for(char i = 0; i < 62; i++){
-//				USART_Transmit_int_hex(c[i]);
-//			}
+			myPrint(string,60);
 			dataReceived = 0;
 		}
 	}
-
 	return 0;
 }
