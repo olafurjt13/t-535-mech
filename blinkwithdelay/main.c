@@ -5,7 +5,7 @@
  *      Author: olafurjonthoroddsen
  */
 
-#define LEDPIN 0b00010000
+#define LEDPIN 0x20;
 
 #include <avr/io.h>
 
@@ -15,7 +15,7 @@ int main(){
 	TCCR1B |= (( 1 << CS12 ) | ( 1 << CS10 ));	// Initialize a clock source with prescaling of 1024 at TimerCounterControlRegister 1B
 	PORTB = LEDPIN;			// Turn on the LED
 	while(1){
-		if(TCNT1 > 156){		// If the TimerCounter register 1 reaches 15625 (1 second)
+		if(TCNT1 > 1563){		// If the TimerCounter register 1 reaches 15625 (1 second)
 			PORTB ^= LEDPIN;	// Toggle the LED
 			TCNT1 = 0;		// Reset the timer value
 		}
