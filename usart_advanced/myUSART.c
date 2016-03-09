@@ -109,6 +109,24 @@ void USART_Transmit_8_dec(unsigned char byte){
 	}
 }
 
+void USART_Transmit_16_dec(unsigned int word){
+	if(word < 10){
+		USART_Transmit(word + 48);
+		USART_Transmit(0x0A);
+	}
+	else if(word < 100){
+		USART_Transmit((word / 10) + 48);
+		USART_Transmit((word % 10) + 48);
+		USART_Transmit(0x0A);
+	}
+	else if(word < 1000){
+		USART_Transmit((word / 100) + 48);
+		USART_Transmit(((word - (word/100)*100) / 10) + 48);
+		USART_Transmit(((word - (word/100)*100) % 10) + 48);
+		USART_Transmit(0x0A);
+	}
+}
+
 void myPrint(unsigned char str[], unsigned char len){
 	for(unsigned char i = 0; i < len; i++){
 		if(str[i] == '\0'){

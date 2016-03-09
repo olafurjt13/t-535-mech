@@ -4,19 +4,22 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../IMU_communication.c \
+../IMU_module.c \
 ../main.c \
-../myUSART.c 
+../myUSART.c \
+../spi_comm.c 
 
 OBJS += \
-./IMU_communication.o \
+./IMU_module.o \
 ./main.o \
-./myUSART.o 
+./myUSART.o \
+./spi_comm.o 
 
 C_DEPS += \
-./IMU_communication.d \
+./IMU_module.d \
 ./main.d \
-./myUSART.d 
+./myUSART.d \
+./spi_comm.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
