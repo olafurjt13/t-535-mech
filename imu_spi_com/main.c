@@ -22,10 +22,12 @@ int main(){
 
 	while(1){
 		if(dataReceived){
-			//if (rxBuffer == 'q') {dataReceived = 0;};
+			if (rxBuffer == '0' ){dataReceived = 0;};
 			IMU_read_acc(acc_data);
-			USART_Transmit_16_dec(acc_data[0]);
-			dataReceived = 0;
+			USART_Transmit_16_hex(acc_data[0]);
+			USART_Transmit_16_hex(acc_data[1]);
+			USART_Transmit_16_hex(acc_data[2]);
+			//dataReceived = 0;
 		}
 
 

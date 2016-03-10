@@ -131,6 +131,9 @@ void USART_Transmit_16_dec(unsigned int word){
 		USART_Transmit((( (word - (word/1000)*1000) % 100) - (word - ((word/1000)*1000) % 100)/10)*10 +48);
 		USART_Transmit(0x0A);
 	}
+	else{
+		USART_Transmit('q');
+	}
 }
 
 
