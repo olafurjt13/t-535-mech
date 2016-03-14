@@ -20,14 +20,14 @@ void SPI_MasterInit(void){
 	// set MOSI, SCK and SS as output, all others are inputs.
 	DDR_SPI = ( 1 << SPI_MOSI ) | ( 1 << SPI_SCK ) | ( 1 << SPI_SS );
 
+	// Ensure that the SS line is high (no transmission) when the initialization is finished
+	SPI_PORT |= ( 1 << SPI_SS );
+
 	// SPI Control Register
 	// SPE bit: SPI Enable
 	// MSTR bit: Master select bit
 	// SPR0 bit: Clock select bit, sets clock rate to Fosc/16, sets the clock polarity such that SCK is high when idle
 	SPCR = ( 1 << SPE ) | ( 1 << MSTR ) | ( 1 << SPR0 ) | ( 1 << CPOL );
-
-	// Ensure that the SS line is high (no transmission) when the initialization is finished
-	SPI_PORT |= ( 1 << SPI_SS );
 }
 
 void SPI_Initiate_Transmission(){
@@ -50,12 +50,11 @@ char SPI_MasterTransmit(char cData){
 	// SPI Data Register, transfers data between register file and the SPI shift register
 	SPDR = cData;
 
-	//asm volatile("nop");	// This is supposed to help
+	asm volatile("nop");	// This is supposed to help
 
 	// Wait for transmission to complete
 	// SPI Status Register
 	// SPIF bit: SPI Interrupt Flag, it is set when a serial transfer is complete
 	while ( !( SPSR & ( 1 << SPIF ) ) );
 	return SPDR;
-
 }

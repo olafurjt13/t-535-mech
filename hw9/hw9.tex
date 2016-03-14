@@ -1,0 +1,207 @@
+\documentclass[11pt,a4paper,titlepage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\RequirePackage[layout=inline]{fixme}
+
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{courier}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage[toc, page]{appendix}
+
+\usepackage{algpseudocode}
+\usepackage[bottom]{footmisc}
+\usepackage{verbatimbox}
+
+\usepackage{changepage}
+
+\usepackage{multirow}
+
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+
+%% Units:
+\newcommand{\W}{\,\textrm{W}}
+\newcommand{\A}{\,\textrm{A}}
+\newcommand{\mA}{\,\textrm{mA}}
+\newcommand{\N}{\,\textrm{N}}
+\newcommand{\Hz}{\,\textrm{Hz}}
+\newcommand{\V}{\,\textrm{V}}
+\newcommand{\Ohms}{\,\Omega}
+\newcommand{\kOhm}{\,\text{k}\Omega}
+\newcommand{\nF}{\,\textrm{nF}}
+\newcommand{\dB}{\,\textrm{dB}}
+\newcommand{\VperBit}{\,\textrm{V/bit}}
+\newcommand{\NperBit}{\,\textrm{N/bit}}
+
+\newcommand{\degC}{\,^{\circ}\text{C}}
+
+\lstset{ %
+	backgroundcolor=\color{white},   % choose the background color
+	basicstyle=\scriptsize,        % size of fonts used for the code
+	breaklines=true,                 % automatic line breaking only at whitespace
+	captionpos=b,                    % sets the caption-position to bottom
+	commentstyle=\color{mygreen},    % comment style
+	escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+	keywordstyle=\color{blue},       % keyword style
+	stringstyle=\color{mymauve},     % string literal style
+	numbers=left,
+}
+
+%\renewcommand{\thesubsection}{\thesection.\alph{subsection}}
+
+
+
+\usepackage{booktabs}
+\usepackage[backend=biber, bibencoding=utf8, style=ieee]{biblatex}
+
+\addbibresource{references.bib}
+\usepackage[final,hidelinks]{hyperref} % must be last package loaded
+
+\author{Ólafur Jón Thoroddsen}  % My name, for the titlepage
+\title{\includegraphics{graphics/ru-logo}\\\vspace{10mm}
+	Mechatronics II\\T-535-MECH \ \\Homework 9}  % The title, for the titlepage
+
+\begin{document}
+	\pagenumbering{arabic}
+	\maketitle
+	
+	\tableofcontents
+	\pagebreak
+	
+	\section{Vishay SI4384DY fast switching MOSFET}
+	
+	The SI4384DY is the transistor that the Arduino board uses for motor control. From the datasheet~\cite{si4384dy} for the SI4384DY we have the thermal resistance ratings as shown in table~\ref{tab:thermal}.
+	
+	\begin{table}[h]
+		\centering
+		\hspace*{-2.7cm}
+		\begin{tabular}{lccccc}
+			\toprule
+			\textbf{Parameter}	&	&	\textbf{Symbol}	&	\textbf{Typical}	&	\textbf{Maximum}	&	\textbf{Unit}\\
+			\midrule
+			Maximum Junction-to-Ambient (MOSFET)	&	Steady State	&	$\text{R}_{\text{thJA}}$	&	71	&	85	&	$\degC$/W\\	
+			\bottomrule
+		\end{tabular}
+		\caption{Thermal resistance rating for the SI4384DY transistor}
+		\label{tab:thermal}
+	\end{table}
+	\vspace{5mm}
+	
+	\noindent The resistance from drain to source ($\text{R}_{\text{DS}}$) in the transistor is dependent on the gate to source voltage ($\text{V}_{\text{GS}}$). The datasheet provides two values for $\text{R}_{\text{DS}}$, shown in table~\ref{tab:rds}.
+	
+	\vspace{5mm}
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{clc}
+			\toprule
+			$\textbf{V}_{\textbf{DS}}$	[V]	&	$\textbf{R}_{\textbf{DS}}$ [$\Omega$]	&	$\textbf{I}_{\textbf{D}}$ [A]\\
+			\midrule
+			\multirow{2}{*}{30} 	&		0.0085 at $\text{V}_{\text{GS}} = 10\V$	&	15\\
+			&	0.0125 at $\text{V}_{\text{GS}} = 4.5\V$	&	12\\
+			\bottomrule
+		\end{tabular}
+		\caption{The resistance values of the Drain-Source path through the transistor for different values of $\text{V}_{\text{GS}}$.}
+		\label{tab:rds}
+	\end{table}
+	\vspace{5mm}
+	
+	\noindent The Arduino's logic voltage is 5\V\ so $\text{R}_{\text{DS}} \approx 0.0125~\Omega$. If a motor is connected to the transistor and $\text{I}_\text{D} = 10\A$, the power consumption is
+	\begin{equation}
+	\begin{aligned}
+		P &= I_D^2R_{DS} \\
+		&= 10^2 \times 0.0125\\
+		&= 1.25\W\\
+	\end{aligned}
+	\end{equation} 	
+	
+	\noindent From table~\ref{tab:thermal}, the Junction-to-Ambient temperature is then
+	\[
+		T = 71\times 1.25 = 88.75\degC
+	\]
+	
+	
+	\section{Analog-Digital Converters (ADCs)}
+	
+	
+	
+	\pagebreak
+	\section{Progress with my project}
+	
+	\subsection{Last week}
+	This week I worked mostly on software design and distinguished more between each of the modules I need for my project. This is important for me because a complicated project like this needs to be well organized so that I can work systematically on each module and it helps me keep my sanity. The result is displayed in figure~\ref{fig:software}.
+	
+	With this design, I worked on the IMU module which uses an SPI module (not shown in figure~\ref{fig:software}) to communicate with the sensor itself. This is now in it's final stages before I can start implementing other parts of the robot that use the actual IMU sensor values.
+	
+	
+	
+	
+	After discussion with my peers, I have decided to implement the PWM module using the output compare pins that can be toggled using interrupts. That way the PWM functionality is reduced in complexity from the main programs point of view.
+	
+	\pagebreak
+	\subsection{Next week}
+	
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{llc}
+			\toprule
+			Task no.	&	Task	&	ETC\footnotemark\\
+			\midrule
+			1	&	\begin{tabular}{@{}l@{}}Finish the IMU module\\\end{tabular} &	5 hours \\	
+			\midrule	
+			2	&	\begin{tabular}{@{}l@{}}Write the PWM code that uses output compare pins\end{tabular}	&	10 hours\\
+			\midrule
+			3	&	\begin{tabular}{@{}l@{}}Test the accuracy of the\\IMU sensor\end{tabular}	&	5 hours\\
+			\midrule
+			4	&		\begin{tabular}{@{}l@{}}Plan the control system and\\start designing at a high level\end{tabular}	&	5 hours\\
+			\bottomrule
+		\end{tabular}
+		\label{tab:nextweek}
+	\end{table}
+	
+	
+	\footnotetext{Estimated Time to Complete}
+
+	\subsection{Long term plan}
+	
+	\begin{table}[h]
+		\centering
+		\hspace*{-2cm}
+		\begin{tabular}{lccc}
+			\toprule
+			Week	&	Software design	&	Mechanical design	&	Testing\\
+			\midrule
+			9	&	IMU \& PWM	&	\begin{tabular}{@{}l@{}}Power circuitry\\2nd prototype\end{tabular}	&	\begin{tabular}{@{}l@{}}Estimate power consumption\\PID motor control\end{tabular}\\
+			\midrule
+			10	&	Rethink PID control	&	3D drawing of the robot	&	Power consumption	\\
+			\midrule
+			11	&	\begin{tabular}{@{}l@{}}Integrate IMU, PID\\ and PWM modules\end{tabular}	&	Altium schematics of electronics	&	Integration\\
+			\midrule
+			12	&	Integration	&	Integration	&	Integration	\\
+			\bottomrule
+		\end{tabular}
+		\label{tab:longterm}
+		\hspace*{-2cm}
+	\end{table}
+	
+	
+	
+\pagebreak
+%\section*{Appendices}
+\appendix
+
+
+
+\pagebreak
+\printbibliography
+
+\end{document}

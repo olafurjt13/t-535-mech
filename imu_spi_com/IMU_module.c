@@ -45,23 +45,23 @@ void IMU_init(){
 	char setCtrlReg5 = ( 1 << ACC_Z ) | ( 1 << ACC_Y ) | ( 1 << ACC_X );
 
 	// Send write address
-		SPI_Initiate_Transmission();
+	SPI_Initiate_Transmission();
 	SPI_MasterTransmit( WRITE | CTRL_REG5_XL );
+
 	// Send ctrlReg5 bit pattern to turn on X,Y,Z acceleration sensors
 	SPI_MasterTransmit( setCtrlReg5 );
-		SPI_End_Transmission();
+	SPI_End_Transmission();
 
-	asm("nop");
+	//asm("nop");
 	char setCtrlReg8 = ( 1 << IF_ADD_INC );
 
 	// Send write address
 		SPI_Initiate_Transmission();
+
 	SPI_MasterTransmit( WRITE | CTRL_REG8 );
 	// Send setCtrlReg8 bit pattern to turn auto increment registers on
 	SPI_MasterTransmit( setCtrlReg8 );
 		SPI_End_Transmission();
-
-	asm("nop");
 	//unsigned char doneIMU[50] = "Finished initializing IMU\0";
 	//myPrint(doneIMU,30);
 }
@@ -81,7 +81,6 @@ void IMU_read_acc(int *accBuffer){
 			spiBuffer[i] = SPI_MasterTransmit(0x00);
 	}
 	SPI_End_Transmission();
-	asm("nop");
 
 	SPI_Initiate_Transmission();
 	SPI_MasterTransmit( READ | OUT_Y_XL );
@@ -89,7 +88,6 @@ void IMU_read_acc(int *accBuffer){
 			spiBuffer[i] = SPI_MasterTransmit(0x00);
 	}
 	SPI_End_Transmission();
-	asm("nop");
 
 	SPI_Initiate_Transmission();
 	SPI_MasterTransmit( READ | OUT_Z_XL );
@@ -97,7 +95,6 @@ void IMU_read_acc(int *accBuffer){
 		spiBuffer[i] = SPI_MasterTransmit(0x00);
 	}
 	SPI_End_Transmission();
-	asm("nop");
 
 	acc[0] = (spiBuffer[1] << 8 | spiBuffer[0]);
 	acc[1] = (spiBuffer[3] << 8 | spiBuffer[2]);
