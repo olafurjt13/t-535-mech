@@ -26,11 +26,11 @@ void SPI_MasterInit(void){
 	// SPI Control Register
 	// SPE bit: SPI Enable
 	// MSTR bit: Master select bit
-	// SPR0 bit: Clock select bit, sets clock rate to Fosc/16, sets the clock polarity such that SCK is high when idle
-	SPCR = ( 1 << SPE ) | ( 1 << MSTR ) | ( 1 << CPOL ) | ( 1 << SPR1 );// | ( 1 << SPR0 );
+	// SPR0 bit: Clock select bit, sets clock rate to Fosc/16
+	SPCR = ( 1 << SPE ) | ( 1 << MSTR ) | ( 1 << SPR1 );// | ( 1 << SPR0 );
 
-	// Set data sampling at the trailing edge of SCK
-	SPCR |= ( 1 << CPHA );
+	// Set data sampling at the trailing edge of SCK, sets the clock polarity such that SCK is high when idle
+	SPCR |= ( 1 << CPHA ) | ( 1 << CPOL );
 }
 
 char SPI_MasterTransmit(char cData){
