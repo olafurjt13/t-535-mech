@@ -13,5 +13,6 @@
 
 void IMU_read_acc(int *accBuffer);
 void IMU_init();
+char whoami(void);
 
 #endif /* IMU_MODULE_H_ */

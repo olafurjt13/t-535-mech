@@ -137,7 +137,62 @@ void USART_Transmit_16_dec(unsigned int word){
 }
 
 
-void myPrint(unsigned char str[], unsigned char len){
+void USART_Transmit_16_dec_signed(int word){
+		if (word < 0){
+			USART_Transmit(0x2D);	// Minus sign
+			word = ~word + 1;
+		}
+
+		if(word < 10){
+			USART_Transmit(word + 48);
+			USART_Transmit(0x0A);
+		}
+		else if(word < 100){
+			USART_Transmit((word / 10) + 48);
+			USART_Transmit((word % 10) + 48);
+			USART_Transmit(0x0A);
+		}
+		else if(word < 1000){
+			USART_Transmit((word / 100) + 48);
+			USART_Transmit(((word - (word/100)*100) / 10) + 48);
+			USART_Transmit(((word - (word/100)*100) % 10) + 48);
+			USART_Transmit(0x0A);
+		}
+		else if(word < 10000){
+			USART_Transmit((word / 1000) + 48);
+			USART_Transmit(((word - (word/1000)*1000) / 100) + 48);
+			USART_Transmit((((word - (word/1000)*1000) % 100) / 10) + 48);
+			USART_Transmit((( (word - (word/1000)*1000) % 100) - (word - ((word/1000)*1000) % 100)/10)*10 +48);
+			USART_Transmit(0x0A);
+		}
+		else{
+			USART_Transmit('q');
+		}
+	}
+
+void USART_Transmit_dec(int word){
+	if (word < 0){
+				USART_Transmit(0x2D);	// Minus sign
+				word = ~word + 1;
+	}
+
+	char tmp[20];
+	char count = 0;
+	while(word > 9){
+		tmp[count] = word%10;
+		word = word/10;
+		count++;
+	}
+	tmp[count] = word;
+	for(int i = count; i >= 0; i--){
+		USART_Transmit(tmp[i] + 48);
+	}
+}
+
+
+
+
+void myPrintNL(unsigned char str[], unsigned char len){
 	for(unsigned char i = 0; i < len; i++){
 		if(str[i] == '\0'){
 			break;
@@ -145,6 +200,15 @@ void myPrint(unsigned char str[], unsigned char len){
 		USART_Transmit(str[i]);
 	}
 	USART_Transmit(0x0A);
+}
+
+void myPrint(unsigned char str[], unsigned char len){
+	for(unsigned char i = 0; i < len; i++){
+		if(str[i] == '\0'){
+			break;
+		}
+		USART_Transmit(str[i]);
+	}
 }
 
 

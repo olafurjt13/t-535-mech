@@ -27,34 +27,34 @@ void SPI_MasterInit(void){
 	// SPE bit: SPI Enable
 	// MSTR bit: Master select bit
 	// SPR0 bit: Clock select bit, sets clock rate to Fosc/16, sets the clock polarity such that SCK is high when idle
-	SPCR = ( 1 << SPE ) | ( 1 << MSTR ) | ( 1 << SPR0 ) | ( 1 << CPOL );
-}
+	SPCR = ( 1 << SPE ) | ( 1 << MSTR ) | ( 1 << CPOL ) | ( 1 << SPR1 );// | ( 1 << SPR0 );
 
-void SPI_Initiate_Transmission(){
-	//unsigned char begin_transmit[50] = "Begin SPI Transmission\0";
-	//myPrint(begin_transmit,30);
-	// Pull the SS line low to initiate transmission
-	SPI_PORT &= ~( 1 << SPI_SS );
-}
-
-void SPI_End_Transmission(){
-	//unsigned char end_transmit[50] = "Ending SPI Transmission\0";
-	//myPrint(end_transmit,30);
-	// Pull the SS line high to end transmission
-	SPI_PORT |= ( 1 << SPI_SS );
+	// Set data sampling at the trailing edge of SCK
+	SPCR |= ( 1 << CPHA );
 }
 
 char SPI_MasterTransmit(char cData){
 	//unsigned char transmitting[50] = "Transmitting over SPI now\0";
 	//myPrint(transmitting,30);
 	// SPI Data Register, transfers data between register file and the SPI shift register
+	//USART_Transmit_8_hex(cData);
 	SPDR = cData;
 
-	asm volatile("nop");	// This is supposed to help
+	//asm volatile("nop");	// This is supposed to help
 
 	// Wait for transmission to complete
 	// SPI Status Register
 	// SPIF bit: SPI Interrupt Flag, it is set when a serial transfer is complete
 	while ( !( SPSR & ( 1 << SPIF ) ) );
+	if(!(SPCR & ( 1 << MSTR) ) ){SPCR |= ( 1 << MSTR);}
+
 	return SPDR;
 }
+
+/*
+char SPI_MasterReceive(){
+	while ( !( SPSR & (1 << SPIF) ) ){};
+	if(!(SPCR & ( 1 << MSTR) ) ){SPCR |= ( 1 << MSTR);}
+	return SPDR;
+}
+*/
