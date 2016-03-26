@@ -1,0 +1,180 @@
+\documentclass[11pt,a4paper,titlepage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+
+\RequirePackage[layout=inline]{fixme}
+
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{courier}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+\usepackage[toc, page]{appendix}
+
+\usepackage{algpseudocode}
+\usepackage[bottom]{footmisc}
+\usepackage{verbatimbox}
+
+\usepackage{changepage}
+
+\usepackage{multirow}
+
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+
+%% Units:
+\newcommand{\W}{\,\textrm{W}}
+\newcommand{\A}{\,\textrm{A}}
+\newcommand{\mA}{\,\textrm{mA}}
+\newcommand{\N}{\,\textrm{N}}
+\newcommand{\Hz}{\,\textrm{Hz}}
+\newcommand{\V}{\,\textrm{V}}
+\newcommand{\Ohms}{\,\Omega}
+\newcommand{\kOhm}{\,\text{k}\Omega}
+\newcommand{\nF}{\,\textrm{nF}}
+\newcommand{\dB}{\,\textrm{dB}}
+\newcommand{\VperBit}{\,\textrm{V/bit}}
+\newcommand{\NperBit}{\,\textrm{N/bit}}
+
+\newcommand{\degC}{\,^{\circ}\text{C}}
+
+\lstset{ %
+	backgroundcolor=\color{white},   % choose the background color
+	basicstyle=\scriptsize,        % size of fonts used for the code
+	breaklines=true,                 % automatic line breaking only at whitespace
+	captionpos=b,                    % sets the caption-position to bottom
+	commentstyle=\color{mygreen},    % comment style
+	escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+	keywordstyle=\color{blue},       % keyword style
+	stringstyle=\color{mymauve},     % string literal style
+	numbers=left,
+}
+
+%\renewcommand{\thesubsection}{\thesection.\alph{subsection}}
+
+
+
+\usepackage{booktabs}
+\usepackage[backend=biber, bibencoding=utf8, style=ieee]{biblatex}
+
+\addbibresource{references.bib}
+\usepackage[final,hidelinks]{hyperref} % must be last package loaded
+
+\author{Ólafur Jón Thoroddsen}  % My name, for the titlepage
+\title{\includegraphics{graphics/ru-logo}\\\vspace{10mm}
+	Mechatronics II\\T-535-MECH \ \\Homework 10}  % The title, for the titlepage
+
+\begin{document}
+	\pagenumbering{arabic}
+	\maketitle
+	
+	\tableofcontents
+	\pagebreak
+	
+	\section{ATmega328p memory types}
+	
+	There are three types of memory on board the ATmega328p microcontroller, Flash, RAM and EEPROM. They all differ in size and function.
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{ccc}
+			\toprule
+			Flash	&	EEPROM	&	RAM	\\
+			\midrule
+			32 kB	&	1 kB	&	2kB	\\
+			\bottomrule
+		\end{tabular}
+		\caption{The memory types of the ATmega328p and the sizes of each one.}
+		\label{tab:memory}
+	\end{table}
+	
+	\subsection{Flash memory}
+	The Flash memory is the largest memory on board. It is where programs are loaded into when programming  the microcontroller.
+	
+	\subsection{EEPROM}
+	\textsc{EEPROM} is an abbreviation for Electrically Erasable Programmable Read Only Memory. It is non-volatile memory which means that it is not affected when the processor itself resets or is powered down. It has a limited number of write cycles which means that it should be taken into account in programming to limit the number of \textsc{EEPROM} writes as possible.
+	
+	\subsection{RAM}
+	The \textsc{RAM} is an abbreviation for Random Access Memory and it is where a program stores local variables at runtime in a stack, growing from bottom up. The \textsc{RAM} also is the place where the Stack is stored, which is where subroutines store their local variables.
+	
+	
+	\section{Storing program parameters between sessions}
+	The way to store program parameters between sessions is to use the \textsc{EEPROM}, which will not get erased when the microcontroller is shut down or is reset.
+	
+	
+	\section{Power supply design for an Arduino}
+	A power supply for an Arduino needs to take the main voltage of the household, 220VAC in Europe
+	
+	
+	\pagebreak
+	\section{Progress with my project}
+	
+	\subsection{Last week}
+	
+	
+	
+
+	\subsection{Next week}
+	
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{llc}
+			\toprule
+			Task no.	&	Task	&	ETC\footnotemark\\
+			\midrule
+			1	&	\begin{tabular}{@{}l@{}}Finish the IMU module\\\end{tabular} &	5 hours \\	
+			\midrule	
+			2	&	\begin{tabular}{@{}l@{}}Write the PWM code that uses output compare pins\end{tabular}	&	10 hours\\
+			\midrule
+			3	&	\begin{tabular}{@{}l@{}}Test the accuracy of the\\IMU sensor\end{tabular}	&	5 hours\\
+			\midrule
+			4	&		\begin{tabular}{@{}l@{}}Plan the control system and\\start designing at a high level\end{tabular}	&	5 hours\\
+			\bottomrule
+		\end{tabular}
+		\label{tab:nextweek}
+	\end{table}
+	
+	
+	\footnotetext{Estimated Time to Complete}
+
+	\subsection{Long term plan}
+	
+	\begin{table}[h]
+		\centering
+		\hspace*{-2cm}
+		\begin{tabular}{lccc}
+			\toprule
+			Week	&	Software design	&	Mechanical design	&	Testing\\
+			\midrule
+			9	&	IMU \& PWM	&	\begin{tabular}{@{}l@{}}Power circuitry\\2nd prototype\end{tabular}	&	\begin{tabular}{@{}l@{}}Estimate power consumption\\PID motor control\end{tabular}\\
+			\midrule
+			10	&	Rethink PID control	&	3D drawing of the robot	&	Power consumption	\\
+			\midrule
+			11	&	\begin{tabular}{@{}l@{}}Integrate IMU, PID\\ and PWM modules\end{tabular}	&	Altium schematics of electronics	&	Integration\\
+			\midrule
+			12	&	Integration	&	Integration	&	Integration	\\
+			\bottomrule
+		\end{tabular}
+		\label{tab:longterm}
+		\hspace*{-2cm}
+	\end{table}
+	
+	
+	
+\pagebreak
+%\section*{Appendices}
+\appendix
+
+
+
+\pagebreak
+\printbibliography
+
+\end{document}
