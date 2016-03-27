@@ -11,6 +11,14 @@
 #define ACC_X 3
 #define ODR_XL2 7
 #define ODR_XL1 6
+#define ODR_G2 7
+#define ODR_G1 6
+#define FS_G1 4
+#define FS_G0 3
+#define BW_G1 1
+#define BW_G0 0
+
+#define CTRL_REG1_G 0x10
 
 #define CTRL_REG5_XL 0x1F
 #define CTRL_REG6_XL 0x20
@@ -46,7 +54,11 @@ void IMU_init(){
 			unsigned char errStr[10] = "Error!\0";
 			myPrint(errStr,10);
 	}
+	accInit();
+	gyroInit();
+}
 
+void accInit(){
 	// The bit pattern to turn on acceleration sensing in the Z,Y and X directions
 	char setCtrlReg5 = ( 1 << ACC_Z ) | ( 1 << ACC_Y ) | ( 1 << ACC_X );
 
@@ -77,9 +89,21 @@ void IMU_init(){
 		SPI_MasterTransmit ( WRITE | CTRL_REG6_XL );
 		SPI_MasterTransmit ( setCtrlReg6 );
 	SPI_End_Transmission();
+}
 
+
+void gyroInit(){
+	// Set output data rate (ODR) to 952Hz, Full scale selection (FS) to 245dps and gyro bandwidth (BW) to 33Hz
+	unsigned char setCtrlReg1 = ( 1 << ODR_G2 ) | ( 1 << ODR_G1 ) | ( 0 << FS_G1 ) | ( 0 << FS_G0 ) | ( 0 << BW_G1 ) | ( 0 << BW_G0);
+
+	SPI_Initiate_Transmission();
+		SPI_MasterTransmit ( WRITE | CTRL_REG1_G );
+		SPI_MasterTransmit ( setCtrlReg1 );
+	SPI_End_Transmission();
 
 }
+
+
 void IMU_read_acc(int *accBuffer){
 	// char sendingRequest[27] = "Now sending request to IMU\n";
 	// char readingFromSPDR[18] = "Reading from SPDR\n";
