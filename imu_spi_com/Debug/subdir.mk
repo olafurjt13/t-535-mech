@@ -6,18 +6,21 @@
 C_SRCS += \
 ../IMU_module.c \
 ../main.c \
+../motorControl.c \
 ../myUSART.c \
 ../spi_comm.c 
 
 OBJS += \
 ./IMU_module.o \
 ./main.o \
+./motorControl.o \
 ./myUSART.o \
 ./spi_comm.o 
 
 C_DEPS += \
 ./IMU_module.d \
 ./main.d \
+./motorControl.d \
 ./myUSART.d \
 ./spi_comm.d 
 

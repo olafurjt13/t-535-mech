@@ -9,6 +9,6 @@
 #define CLOCKFUNCS_H_
 
 void clock_init();
-
+void setLedPWM(unsigned char intensity);
 
 #endif /* CLOCKFUNCS_H_ */

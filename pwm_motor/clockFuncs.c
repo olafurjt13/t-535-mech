@@ -19,3 +19,20 @@ void clock_init(){
 	// Clearing interrupt flags (writing 1 to them => clearing)
 	TIFR0 = ( 1 << OCF0B ) | ( 1 << TOV0 );
 }
+
+void setLedPWM(unsigned char intensity){
+	if (intensity > 100){intensity = 100;};
+	if (intensity < 0){intensity = 0;};
+	OCR0B = ((100 - intensity)*255)/100;
+}
+
+
+ISR(TIMER0_COMPB_vect){
+	PORTB |= 0x20;
+}
+
+ISR(TIMER0_OVF_vect){
+	PORTB ^= 0x20;
+}
+
+
