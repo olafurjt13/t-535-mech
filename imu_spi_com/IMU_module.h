@@ -18,4 +18,8 @@ void accInit();
 void gyroInit();
 char whoami(void);
 
+long sum(int *array,char size);
+void readAcc(int *dataBuff);
+void readGyro(int *dataBuff);
+
 #endif /* IMU_MODULE_H_ */

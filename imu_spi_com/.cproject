@@ -92,8 +92,11 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.927358493" name="Optimization Level" superClass="de.innot.avreclipse.cppcompiler.option.optimize" value="de.innot.avreclipse.cppcompiler.optimize.size" valueType="enumerated"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.linker.winavr.app.release.1400209654" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.release">
-								<option id="de.innot.avreclipse.linker.option.libs.111934139" name="Libraries (-l)" superClass="de.innot.avreclipse.linker.option.libs"/>
-								<option id="de.innot.avreclipse.linker.option.otherlinkargs.1614140872" name="Other Arguments" superClass="de.innot.avreclipse.linker.option.otherlinkargs" value="" valueType="string"/>
+								<option id="de.innot.avreclipse.linker.option.libs.111934139" name="Libraries (-l)" superClass="de.innot.avreclipse.linker.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="m"/>
+									<listOptionValue builtIn="false" value="printf_flt"/>
+								</option>
+								<option id="de.innot.avreclipse.linker.option.otherlinkargs.1614140872" name="Other Arguments" superClass="de.innot.avreclipse.linker.option.otherlinkargs" value="-uvfprintf" valueType="string"/>
 								<inputType id="de.innot.avreclipse.tool.linker.input.716589298" name="OBJ Files" superClass="de.innot.avreclipse.tool.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -123,6 +126,13 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/imu_spi_com"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/imu_spi_com"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>

@@ -16,11 +16,11 @@
 #define BAUD 9600
 
 // USART function for outputting floats to stdout
-/*int usart_putchar_printf(char var, FILE *stream){
-	if(var == 'n'){USART_Transmit('\r');}
-	USART_Transmit(var);
-	return 0;
-}*/
+//int usart_putchar_printf(char var, FILE *stream){
+//	if(var == 'n'){USART_Transmit('\r');}
+//	USART_Transmit(var);
+//	return 0;
+//}
 
 // OSTREAM to use for floats
 //static FILE mystdout = FDEV_SETUP_STREAM(usart_putchar_printf, NULL, _FDEV_SETUP_WRITE);
@@ -48,25 +48,27 @@ int main(){
 	char timerval_right;
 	char timerval_left;
 
+	DDRD = ( 1 << PD3) ;
 	while(1){
 		if(dataReceived){
-			IMU_read_acc(acc_data);
-			IMU_read_gyro(gyro_data);
+			PORTD ^= ( 1 << PD3 );
+			readAcc(acc_data);
+			readGyro(gyro_data);
 
-			float angX = (float)gyro_data[0]*gyro_res;
-			float angY = (float)gyro_data[1]*gyro_res;
-
-			if(angX < 0){angX = -angX;}
-			if(angY < 0){angY = -angY;}
-			timerval_right = (angX/2.0)*255;
-			timerval_left = (angY/2.0)*255;
-
-			USART_Transmit_dec(timerval_right);
-			USART_Transmit(0x20);
-			USART_Transmit_dec(timerval_left);
-			USART_Transmit(0x0A);
-			setMotorSpeed((char)(timerval_right),right);
-			setMotorSpeed((char)(timerval_left),left);
+//			float angX = (float)gyro_data[0]*gyro_res;
+//			float angY = (float)gyro_data[1]*gyro_res;
+//
+//			if(angX < 0){angX = -angX;}
+//			if(angY < 0){angY = -angY;}
+//			timerval_right = (angX/2.0)*255;
+//			timerval_left = (angY/2.0)*255;
+//
+//			USART_Transmit_dec(timerval_right);
+//			USART_Transmit(0x20);
+//			USART_Transmit_dec(timerval_left);
+//			USART_Transmit(0x0A);
+//			setMotorSpeed((char)(timerval_right),right);
+//			setMotorSpeed((char)(timerval_left),left);
 		}
 	}
 	return 0;

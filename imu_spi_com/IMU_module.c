@@ -46,6 +46,23 @@
 #include "IMU_module.h"
 #include "myUSART.h"
 
+// Reserving space for the moving average filter to store data between calls
+int accX_rawDataBuffer[10];
+int accY_rawDataBuffer[10];
+int accZ_rawDataBuffer[10];
+
+int gyroX_rawDataBuffer[10];
+int gyroY_rawDataBuffer[10];
+int gyroZ_rawDataBuffer[10];
+
+// Flag to let the MAF know if it needs to accumulate data, defaults to true
+unsigned char accumulatingAcc = 1;
+unsigned char accumulatingGyro = 1;
+
+// An indexer to know where to put the next measurement value from the IMU
+unsigned char accBufferIndexer = 0;
+unsigned char gyroBufferIndexer = 0;
+
 
 void IMU_init(){
 	SPI_MasterInit();
@@ -128,6 +145,73 @@ void IMU_read_acc(int *accBuffer){
 	acc[2] = (spiBuffer[5] << 8 | spiBuffer[4]);
 }
 
+void readAcc(int *dataBuff){
+	int rawdata[3];
+
+	if (accumulatingAcc){
+		for(unsigned char i = 0; i < 10; i++){
+			IMU_read_acc(rawdata);
+			accX_rawDataBuffer[i] = rawdata[0];
+			accY_rawDataBuffer[i] = rawdata[1];
+			accZ_rawDataBuffer[i] = rawdata[2];
+		}
+		dataBuff[0] = sum(accX_rawDataBuffer,10)/10;
+		dataBuff[1] = sum(accY_rawDataBuffer,10)/10;
+		dataBuff[2] = sum(accZ_rawDataBuffer,10)/10;
+
+		accumulatingAcc = 0;
+	}
+	else{
+		IMU_read_acc(rawdata);
+		accX_rawDataBuffer[accBufferIndexer] = rawdata[0];
+		accY_rawDataBuffer[accBufferIndexer] = rawdata[1];
+		accZ_rawDataBuffer[accBufferIndexer] = rawdata[2];
+		accBufferIndexer = accBufferIndexer + 1;
+		if (accBufferIndexer == 9){accBufferIndexer = 0;} // Reset the bufferIndexer
+
+		dataBuff[0] = sum(accX_rawDataBuffer,10)/10;
+		dataBuff[1] = sum(accY_rawDataBuffer,10)/10;
+		dataBuff[2] = sum(accZ_rawDataBuffer,10)/10;
+	}
+}
+
+void readGyro(int *dataBuff){
+	int rawdata[3];
+
+	if(accumulatingGyro){
+		for(unsigned char i = 0; i < 10; i++){
+			IMU_read_gyro(rawdata);
+			gyroX_rawDataBuffer[i] = rawdata[0];
+			gyroY_rawDataBuffer[i] = rawdata[1];
+			gyroZ_rawDataBuffer[i] = rawdata[2];
+		}
+		dataBuff[0] = sum(gyroX_rawDataBuffer,10)/10;
+		dataBuff[1] = sum(gyroY_rawDataBuffer,10)/10;
+		dataBuff[2] = sum(gyroZ_rawDataBuffer,10)/10;
+		accumulatingGyro = 0;
+	}
+	else{
+		IMU_read_gyro(rawdata);
+		gyroX_rawDataBuffer[gyroBufferIndexer] = rawdata[0];
+		gyroY_rawDataBuffer[gyroBufferIndexer] = rawdata[1];
+		gyroZ_rawDataBuffer[gyroBufferIndexer] = rawdata[2];
+		gyroBufferIndexer = gyroBufferIndexer + 1;
+		if (gyroBufferIndexer == 9){gyroBufferIndexer = 0;} // Reset the bufferIndexer
+
+		dataBuff[0] = sum(accX_rawDataBuffer,10)/10;
+		dataBuff[1] = sum(accY_rawDataBuffer,10)/10;
+		dataBuff[2] = sum(accZ_rawDataBuffer,10)/10;
+	}
+
+}
+
+long sum(int *array,char size){
+	long output = 0;
+	for(unsigned char i = 0; i < size; i++){
+		output = output + (long)array[i];
+	}
+	return output;
+}
 
 void IMU_read_gyro(int *gyroBuffer){
 	// char sendingRequest[27] = "Now sending request to IMU\n";
