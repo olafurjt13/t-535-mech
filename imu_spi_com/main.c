@@ -48,27 +48,27 @@ int main(){
 	char timerval_right;
 	char timerval_left;
 
-	DDRD = ( 1 << PD3) ;
+	DDRD |= ( 1 << PD3) ;
 	while(1){
 		if(dataReceived){
 			PORTD ^= ( 1 << PD3 );
-			readAcc(acc_data);
-			readGyro(gyro_data);
+			readAcc(acc_data,10);
+			readGyro(gyro_data,10);
 
-//			float angX = (float)gyro_data[0]*gyro_res;
-//			float angY = (float)gyro_data[1]*gyro_res;
-//
-//			if(angX < 0){angX = -angX;}
-//			if(angY < 0){angY = -angY;}
-//			timerval_right = (angX/2.0)*255;
-//			timerval_left = (angY/2.0)*255;
-//
-//			USART_Transmit_dec(timerval_right);
-//			USART_Transmit(0x20);
-//			USART_Transmit_dec(timerval_left);
-//			USART_Transmit(0x0A);
-//			setMotorSpeed((char)(timerval_right),right);
-//			setMotorSpeed((char)(timerval_left),left);
+			float angX = (float)gyro_data[0]*gyro_res;
+			float angY = (float)gyro_data[1]*gyro_res;
+
+			if(angX < 0){angX = -angX;}
+			if(angY < 0){angY = -angY;}
+			timerval_right = (char)((angX/2.0)*255);
+			timerval_left = (char)((angY/2.0)*255);
+
+			USART_Transmit_dec(timerval_right);
+			USART_Transmit(0x20);
+			USART_Transmit_dec(timerval_left);
+			USART_Transmit(0x0A);
+			setMotorSpeed((char)(timerval_right),right);
+			setMotorSpeed((char)(timerval_left),left);
 		}
 	}
 	return 0;

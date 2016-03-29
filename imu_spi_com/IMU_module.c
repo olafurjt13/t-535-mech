@@ -41,10 +41,14 @@
 
 #define MOSI_PIN PORTB
 
-
 #include "spi_comm.h"
 #include "IMU_module.h"
 #include "myUSART.h"
+
+void IMU_read_acc(int *accBuffer);
+void IMU_read_gyro(int *gyroBuffer);
+long sum(int *array,char size);
+
 
 // Reserving space for the moving average filter to store data between calls
 int accX_rawDataBuffer[10];
@@ -62,6 +66,10 @@ unsigned char accumulatingGyro = 1;
 // An indexer to know where to put the next measurement value from the IMU
 unsigned char accBufferIndexer = 0;
 unsigned char gyroBufferIndexer = 0;
+
+// Calibration variables for the gyro and accelerometer
+int accCalibration;
+int gyroCalibration;
 
 
 void IMU_init(){
@@ -145,19 +153,23 @@ void IMU_read_acc(int *accBuffer){
 	acc[2] = (spiBuffer[5] << 8 | spiBuffer[4]);
 }
 
-void readAcc(int *dataBuff){
+/*
+ * This function serves as a get function for acceleration data with a moving average filter.
+ * The smoothness parameter is the number of points in the moving avg filter.
+ */
+void readAcc(int *dataBuff,char smoothness){
 	int rawdata[3];
 
 	if (accumulatingAcc){
-		for(unsigned char i = 0; i < 10; i++){
+		for(unsigned char i = 0; i < smoothness; i++){
 			IMU_read_acc(rawdata);
 			accX_rawDataBuffer[i] = rawdata[0];
 			accY_rawDataBuffer[i] = rawdata[1];
 			accZ_rawDataBuffer[i] = rawdata[2];
 		}
-		dataBuff[0] = sum(accX_rawDataBuffer,10)/10;
-		dataBuff[1] = sum(accY_rawDataBuffer,10)/10;
-		dataBuff[2] = sum(accZ_rawDataBuffer,10)/10;
+		dataBuff[0] = sum(accX_rawDataBuffer,smoothness)/smoothness;
+		dataBuff[1] = sum(accY_rawDataBuffer,smoothness)/smoothness;
+		dataBuff[2] = sum(accZ_rawDataBuffer,smoothness)/smoothness;
 
 		accumulatingAcc = 0;
 	}
@@ -167,27 +179,31 @@ void readAcc(int *dataBuff){
 		accY_rawDataBuffer[accBufferIndexer] = rawdata[1];
 		accZ_rawDataBuffer[accBufferIndexer] = rawdata[2];
 		accBufferIndexer = accBufferIndexer + 1;
-		if (accBufferIndexer == 9){accBufferIndexer = 0;} // Reset the bufferIndexer
+		if (accBufferIndexer == (smoothness - 1)){accBufferIndexer = 0;} // Reset the bufferIndexer
 
-		dataBuff[0] = sum(accX_rawDataBuffer,10)/10;
-		dataBuff[1] = sum(accY_rawDataBuffer,10)/10;
-		dataBuff[2] = sum(accZ_rawDataBuffer,10)/10;
+		dataBuff[0] = sum(accX_rawDataBuffer,smoothness)/smoothness;
+		dataBuff[1] = sum(accY_rawDataBuffer,smoothness)/smoothness;
+		dataBuff[2] = sum(accZ_rawDataBuffer,smoothness)/smoothness;
 	}
 }
 
-void readGyro(int *dataBuff){
+
+/*
+ * This function serves as a get function for angular rate data with built in 10 point moving average
+ */
+void readGyro(int *dataBuff,char smoothness){
 	int rawdata[3];
 
 	if(accumulatingGyro){
-		for(unsigned char i = 0; i < 10; i++){
+		for(unsigned char i = 0; i < smoothness; i++){
 			IMU_read_gyro(rawdata);
 			gyroX_rawDataBuffer[i] = rawdata[0];
 			gyroY_rawDataBuffer[i] = rawdata[1];
 			gyroZ_rawDataBuffer[i] = rawdata[2];
 		}
-		dataBuff[0] = sum(gyroX_rawDataBuffer,10)/10;
-		dataBuff[1] = sum(gyroY_rawDataBuffer,10)/10;
-		dataBuff[2] = sum(gyroZ_rawDataBuffer,10)/10;
+		dataBuff[0] = sum(gyroX_rawDataBuffer,smoothness)/smoothness;
+		dataBuff[1] = sum(gyroY_rawDataBuffer,smoothness)/smoothness;
+		dataBuff[2] = sum(gyroZ_rawDataBuffer,smoothness)/smoothness;
 		accumulatingGyro = 0;
 	}
 	else{
@@ -196,11 +212,11 @@ void readGyro(int *dataBuff){
 		gyroY_rawDataBuffer[gyroBufferIndexer] = rawdata[1];
 		gyroZ_rawDataBuffer[gyroBufferIndexer] = rawdata[2];
 		gyroBufferIndexer = gyroBufferIndexer + 1;
-		if (gyroBufferIndexer == 9){gyroBufferIndexer = 0;} // Reset the bufferIndexer
+		if (gyroBufferIndexer == (smoothness - 1)){gyroBufferIndexer = 0;} // Reset the bufferIndexer
 
-		dataBuff[0] = sum(accX_rawDataBuffer,10)/10;
-		dataBuff[1] = sum(accY_rawDataBuffer,10)/10;
-		dataBuff[2] = sum(accZ_rawDataBuffer,10)/10;
+		dataBuff[0] = sum(accX_rawDataBuffer,smoothness)/smoothness;
+		dataBuff[1] = sum(accY_rawDataBuffer,smoothness)/smoothness;
+		dataBuff[2] = sum(accZ_rawDataBuffer,smoothness)/smoothness;
 	}
 
 }
