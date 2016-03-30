@@ -53,14 +53,3 @@ void setMotorSpeed(unsigned char intensity, enum motorID motor){
 	}
 
 }
-
-
-/*
-ISR(TIMER0_COMPB_vect){
-	motorPin |= 0x20;
-}
-
-ISR(TIMER0_OVF_vect){
-	motorPin ^= 0x20;
-}
-*/

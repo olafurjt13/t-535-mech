@@ -68,15 +68,21 @@ unsigned char accBufferIndexer = 0;
 unsigned char gyroBufferIndexer = 0;
 
 // Calibration variables for the gyro and accelerometer
-int accCalibration;
-int gyroCalibration;
+int accCalibration[3] = {0,0,0};
+int gyroCalibration[3] = {0,0,0};
 
 
 void IMU_init(){
+
+	PCICR |= ( 1 << PCIE2 );
+	// Enabling pin change interrupt on PD2
+	PCMSK2 |= ( 1 << PCINT18 );
+	calibrationFlag = 0;
+
 	SPI_MasterInit();
 
 	if (whoami() != 0x68){
-			unsigned char errStr[10] = "Error!\0";
+			unsigned char errStr[30] = "Error connecting to IMU!\0";
 			myPrint(errStr,10);
 	}
 	accInit();
@@ -128,29 +134,40 @@ void gyroInit(){
 
 }
 
+/*
+ * This function initializes calibration of the gyro and accelerometer
+ * For this to work, the IMU must be completely stable
+ */
 
-void IMU_read_acc(int *accBuffer){
-	// char sendingRequest[27] = "Now sending request to IMU\n";
-	// char readingFromSPDR[18] = "Reading from SPDR\n";
+void calibrateIMU(){
+	int accBuffer[3];
+	int gyroBuffer[3];
 
-	char spiBuffer[6];
-	int *acc = accBuffer;
+	// Using temporary long variables to reserve space, don't need long to store the resulting variable, only intermediately
+	long accCalibration_TMP[3] = {0,0,0};
+	long gyroCalibration_TMP[3] = {0,0,0};
 
-	// Select the IMU as an SPI Slave
-
-	SPI_Initiate_Transmission();
-
-
-	// Send "read from acceleration output register" signal
-	SPI_MasterTransmit( READ | OUT_X_XL );
-	for (unsigned char i = 0; i < 6; i++){
-			spiBuffer[i] = SPI_MasterTransmit(0x00);
+	IMU_read_acc(accBuffer);
+	IMU_read_gyro(gyroBuffer);
+	for(unsigned char i = 0; i < 3; i++){
+		accCalibration[i] = accBuffer[i];
+		gyroCalibration[i] = gyroBuffer[i];
 	}
-	SPI_End_Transmission();
 
-	acc[0] = (spiBuffer[1] << 8 | spiBuffer[0]);
-	acc[1] = (spiBuffer[3] << 8 | spiBuffer[2]);
-	acc[2] = (spiBuffer[5] << 8 | spiBuffer[4]);
+	for (unsigned int i = 0; i < 1000; i++){
+		IMU_read_acc(accBuffer);
+		IMU_read_gyro(gyroBuffer);
+		for(unsigned char j = 0; j < 3; j++){
+			accCalibration_TMP[j] = (accBuffer[j] + (i+1)*accCalibration_TMP[j])/(i+2);
+			gyroCalibration_TMP[j] = (gyroBuffer[j] + (i+1)*gyroCalibration_TMP[j])/(i+2);
+		}
+	}
+	for(unsigned char i = 0; i < 3; i++){
+		accCalibration[i] = accCalibration_TMP[i];
+		gyroCalibration[i] = gyroCalibration_TMP[i];
+	}
+	// Calibration done
+	calibrationFlag = 0;
 }
 
 /*
@@ -181,9 +198,9 @@ void readAcc(int *dataBuff,char smoothness){
 		accBufferIndexer = accBufferIndexer + 1;
 		if (accBufferIndexer == (smoothness - 1)){accBufferIndexer = 0;} // Reset the bufferIndexer
 
-		dataBuff[0] = sum(accX_rawDataBuffer,smoothness)/smoothness;
-		dataBuff[1] = sum(accY_rawDataBuffer,smoothness)/smoothness;
-		dataBuff[2] = sum(accZ_rawDataBuffer,smoothness)/smoothness;
+		dataBuff[0] = sum(accX_rawDataBuffer,smoothness)/smoothness - accCalibration[0];
+		dataBuff[1] = sum(accY_rawDataBuffer,smoothness)/smoothness - accCalibration[1];
+		dataBuff[2] = sum(accZ_rawDataBuffer,smoothness)/smoothness - (accCalibration[2] - 16384);
 	}
 }
 
@@ -214,11 +231,10 @@ void readGyro(int *dataBuff,char smoothness){
 		gyroBufferIndexer = gyroBufferIndexer + 1;
 		if (gyroBufferIndexer == (smoothness - 1)){gyroBufferIndexer = 0;} // Reset the bufferIndexer
 
-		dataBuff[0] = sum(accX_rawDataBuffer,smoothness)/smoothness;
-		dataBuff[1] = sum(accY_rawDataBuffer,smoothness)/smoothness;
-		dataBuff[2] = sum(accZ_rawDataBuffer,smoothness)/smoothness;
+		dataBuff[0] = sum(gyroX_rawDataBuffer,smoothness)/smoothness - gyroCalibration[0];
+		dataBuff[1] = sum(gyroY_rawDataBuffer,smoothness)/smoothness - gyroCalibration[1];
+		dataBuff[2] = sum(gyroZ_rawDataBuffer,smoothness)/smoothness - gyroCalibration[2];
 	}
-
 }
 
 long sum(int *array,char size){
@@ -227,6 +243,30 @@ long sum(int *array,char size){
 		output = output + (long)array[i];
 	}
 	return output;
+}
+
+void IMU_read_acc(int *accBuffer){
+	// char sendingRequest[27] = "Now sending request to IMU\n";
+	// char readingFromSPDR[18] = "Reading from SPDR\n";
+
+	char spiBuffer[6];
+	int *acc = accBuffer;
+
+	// Select the IMU as an SPI Slave
+
+	SPI_Initiate_Transmission();
+
+
+	// Send "read from acceleration output register" signal
+	SPI_MasterTransmit( READ | OUT_X_XL );
+	for (unsigned char i = 0; i < 6; i++){
+			spiBuffer[i] = SPI_MasterTransmit(0x00);
+	}
+	SPI_End_Transmission();
+
+	acc[0] = (spiBuffer[1] << 8 | spiBuffer[0]);
+	acc[1] = (spiBuffer[3] << 8 | spiBuffer[2]);
+	acc[2] = (spiBuffer[5] << 8 | spiBuffer[4]);
 }
 
 void IMU_read_gyro(int *gyroBuffer){
@@ -263,4 +303,8 @@ char whoami(void){
 	SPI_End_Transmission();
 
 	return buff;
+}
+
+ISR(PCINT2_vect){
+	calibrationFlag = 1;
 }

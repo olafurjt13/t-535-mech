@@ -15,7 +15,7 @@
 
 #define BAUD 9600
 
-// USART function for outputting floats to stdout
+//USART function for outputting floats to stdout
 //int usart_putchar_printf(char var, FILE *stream){
 //	if(var == 'n'){USART_Transmit('\r');}
 //	USART_Transmit(var);
@@ -48,27 +48,64 @@ int main(){
 	char timerval_right;
 	char timerval_left;
 
+	unsigned char acceleration[30] = "Acceleration: \0";
+	unsigned char angularRate[30] = "Angular rate: \0";
 	DDRD |= ( 1 << PD3) ;
+	float angular_position;
 	while(1){
 		if(dataReceived){
+			if(calibrationFlag){calibrateIMU();}
+
 			PORTD ^= ( 1 << PD3 );
 			readAcc(acc_data,10);
 			readGyro(gyro_data,10);
 
-			float angX = (float)gyro_data[0]*gyro_res;
-			float angY = (float)gyro_data[1]*gyro_res;
 
-			if(angX < 0){angX = -angX;}
-			if(angY < 0){angY = -angY;}
-			timerval_right = (char)((angX/2.0)*255);
-			timerval_left = (char)((angY/2.0)*255);
 
-			USART_Transmit_dec(timerval_right);
-			USART_Transmit(0x20);
-			USART_Transmit_dec(timerval_left);
-			USART_Transmit(0x0A);
-			setMotorSpeed((char)(timerval_right),right);
-			setMotorSpeed((char)(timerval_left),left);
+
+//			myPrint(acceleration,30);
+//			USART_Transmit_dec(acc_data[0]);
+//			USART_Transmit(0x20);
+//			USART_Transmit_dec(acc_data[1]);
+//			USART_Transmit(0x20);
+//			USART_Transmit_dec(acc_data[2]);
+//			USART_Transmit(0x20);
+//
+//			myPrint(angularRate,30);
+//			USART_Transmit_dec(gyro_data[0]);
+//			USART_Transmit(0x20);
+//			USART_Transmit_dec(gyro_data[1]);
+//			USART_Transmit(0x20);
+//			USART_Transmit_dec(gyro_data[2]);
+//			USART_Transmit(0x0A);
+			//float angX = (float)gyro_data[0]*gyro_res;
+			//float angY = (float)gyro_data[1]*gyro_res;
+
+
+//			printf("%f", acc_res*acc_data[0]);
+//			USART_Transmit(0x20);
+//			printf("%f", acc_res*acc_data[1]);
+//			USART_Transmit(0x20);
+//			printf("%f", acc_res*acc_data[2]);
+//			USART_Transmit(0x0A);
+//			printf("%f", gyro_res*gyro_data[0]);
+//			USART_Transmit(0x20);
+//			printf("%f", gyro_res*gyro_data[1]);
+//			USART_Transmit(0x20);
+//			printf("%f", gyro_res*gyro_data[2]);
+//			USART_Transmit(0x0A);
+
+//			if(angX < 0){angX = -angX;}
+//			if(angY < 0){angY = -angY;}
+//			timerval_right = (char)((angX/2.0)*255);
+//			timerval_left = (char)((angY/2.0)*255);
+//
+//			USART_Transmit_dec(timerval_right);
+//			USART_Transmit(0x20);
+//			USART_Transmit_dec(timerval_left);
+//			USART_Transmit(0x0A);
+//			setMotorSpeed((char)(timerval_right),right);
+//			setMotorSpeed((char)(timerval_left),left);
 		}
 	}
 	return 0;

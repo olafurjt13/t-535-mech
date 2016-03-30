@@ -18,5 +18,9 @@ char whoami(void);
 
 void readAcc(int *dataBuff,char smoothness);
 void readGyro(int *dataBuff,char smoothness);
+void calibrateIMU();
+
+// Calibration flag for interrupt
+unsigned char calibrationFlag;
 
 #endif /* IMU_MODULE_H_ */
