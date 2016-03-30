@@ -48,7 +48,10 @@ int main(){
 	char timerval_right;
 	char timerval_left;
 
+	unsigned char acceleration[30] = "Acceleration: \0";
+	unsigned char angularRate[30] = "Angular rate: \0";
 	DDRD |= ( 1 << PD3) ;
+	float angular_position;
 	while(1){
 		if(dataReceived){
 			if(calibrationFlag){calibrateIMU();}
@@ -58,19 +61,23 @@ int main(){
 			readGyro(gyro_data,10);
 
 
-			USART_Transmit_dec(acc_data[0]);
-			USART_Transmit(0x20);
-			USART_Transmit_dec(acc_data[1]);
-			USART_Transmit(0x20);
-			USART_Transmit_dec(acc_data[2]);
-			USART_Transmit(0x20);
 
-			USART_Transmit_dec(gyro_data[0]);
-			USART_Transmit(0x20);
-			USART_Transmit_dec(gyro_data[1]);
-			USART_Transmit(0x20);
-			USART_Transmit_dec(gyro_data[2]);
-			USART_Transmit(0x0A);
+
+//			myPrint(acceleration,30);
+//			USART_Transmit_dec(acc_data[0]);
+//			USART_Transmit(0x20);
+//			USART_Transmit_dec(acc_data[1]);
+//			USART_Transmit(0x20);
+//			USART_Transmit_dec(acc_data[2]);
+//			USART_Transmit(0x20);
+//
+//			myPrint(angularRate,30);
+//			USART_Transmit_dec(gyro_data[0]);
+//			USART_Transmit(0x20);
+//			USART_Transmit_dec(gyro_data[1]);
+//			USART_Transmit(0x20);
+//			USART_Transmit_dec(gyro_data[2]);
+//			USART_Transmit(0x0A);
 			//float angX = (float)gyro_data[0]*gyro_res;
 			//float angY = (float)gyro_data[1]*gyro_res;
 

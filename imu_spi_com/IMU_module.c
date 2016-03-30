@@ -235,7 +235,6 @@ void readGyro(int *dataBuff,char smoothness){
 		dataBuff[1] = sum(gyroY_rawDataBuffer,smoothness)/smoothness - gyroCalibration[1];
 		dataBuff[2] = sum(gyroZ_rawDataBuffer,smoothness)/smoothness - gyroCalibration[2];
 	}
-
 }
 
 long sum(int *array,char size){
