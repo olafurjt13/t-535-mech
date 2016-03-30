@@ -11,15 +11,22 @@
 
 enum motorID
 {
-	right = 0,
+	right = 5,
 	left,
+};
+
+enum direction
+{
+	cw,
+	ccw,
 };
 
 
 
 void clock_init();
-void motorInit(char pin);
+void motorInit(char outputPin, char direction);
 void setMotorSpeed(unsigned char intensity, enum motorID motor);
+void setMotorDirection(enum motorID motor,enum direction spin);
 
 
 #endif /* MOTORCONTROL_H_ */

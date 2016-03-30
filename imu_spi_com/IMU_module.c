@@ -48,6 +48,7 @@
 void IMU_read_acc(int *accBuffer);
 void IMU_read_gyro(int *gyroBuffer);
 long sum(int *array,char size);
+void debounceTimerInit();
 
 
 // Reserving space for the moving average filter to store data between calls
@@ -71,22 +72,35 @@ unsigned char gyroBufferIndexer = 0;
 int accCalibration[3] = {0,0,0};
 int gyroCalibration[3] = {0,0,0};
 
+// Debounce counter variable
+unsigned char debounceCounter = 0;
+
 
 void IMU_init(){
-
-	PCICR |= ( 1 << PCIE2 );
-	// Enabling pin change interrupt on PD2
-	PCMSK2 |= ( 1 << PCINT18 );
 	calibrationFlag = 0;
 
 	SPI_MasterInit();
-
 	if (whoami() != 0x68){
 			unsigned char errStr[30] = "Error connecting to IMU!\0";
-			myPrint(errStr,10);
+			myPrintNL(errStr,10);
 	}
 	accInit();
 	gyroInit();
+	debounceTimerInit();
+}
+
+void debounceTimerInit(){
+	// Initialize the counter at 0
+	TCNT1L = 0;
+	TCNT1H = 0;
+	// Enable Output Compare Match Interrupt
+	TIMSK1 |= ( 1 << OCIE1B );
+	// Clearing interrupt flags (writing 1 to them => clearing)
+	//TIFR1 = ( 1 << OCF1B );
+	// Set the output compare to 16000 => 1ms with 1/8t prescaling
+	OCR1B |= 2000;
+	// Set the clock to 1/8th prescaling
+	TCCR1B |= ( 1 << CS11 );
 }
 
 void accInit(){
@@ -96,6 +110,7 @@ void accInit(){
 	// Send write address
 	SPI_Initiate_Transmission();
 	SPI_MasterTransmit( WRITE | CTRL_REG5_XL );
+
 
 	// Send ctrlReg5 bit pattern to turn on X,Y,Z acceleration sensors
 	SPI_MasterTransmit( setCtrlReg5 );
@@ -110,8 +125,6 @@ void accInit(){
 		// Send setCtrlReg8 bit pattern to turn auto increment registers on
 		SPI_MasterTransmit( setCtrlReg8 );
 	SPI_End_Transmission();
-	//unsigned char doneIMU[50] = "Finished initializing IMU\0";
-	//myPrint(doneIMU,30);
 
 	// Set output data rate to 952Hz
 	char setCtrlReg6 = ( 1 << ODR_XL2 ) | ( 1 << ODR_XL1 );
@@ -305,6 +318,19 @@ char whoami(void){
 	return buff;
 }
 
-ISR(PCINT2_vect){
-	calibrationFlag = 1;
+ISR(TIMER1_COMPB_vect){
+	TCNT1L = 0;
+	TCNT1H = 0;
+//	if( PIND & ( 1 << PD2 )){
+//		debounceCounter++;
+//	}
+//	else{
+//		debounceCounter = 0;
+//	}
+//
+//	if (debounceCounter > 49){
+//		calibrationFlag = 1;
+//		debounceCounter = 0;
+//	}
+	PORTD ^= ( 1 << PD3 );
 }

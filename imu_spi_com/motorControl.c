@@ -9,13 +9,15 @@
 #include "myUSART.h"
 #include <avr/io.h>
 
-unsigned char motorPin;
 unsigned char clockInitFlag = 0;
 
 
-void motorInit(char pin){
-	motorPin = ( 1 << pin);
-	DDRD |= motorPin;
+void motorInit(char outputPin, char direction){
+	setMotorSpeed(0,right);
+	setMotorSpeed(0,left);
+	unsigned char directionPin = ( 1 << direction );
+	unsigned char motorPin = ( 1 << outputPin);
+	DDRD |= ( directionPin | motorPin );
 	if (!clockInitFlag){
 		clock_init();
 	}
@@ -31,13 +33,16 @@ void clock_init(){
 	TCCR0B =  ( 1 << CS00 );
 	// Initialize the counter at 0
 	TCNT0 = 0;
-
-	/*// Enable Output Compare Match and Overflow interrupts
-	TIMSK0 = ( 1 << OCIE0B ) | ( 1 << TOIE0 );
-	// Clearing interrupt flags (writing 1 to them => clearing)
-	TIFR0 = ( 1 << OCF0B ) | ( 1 << TOV0 );
-	*/
 	clockInitFlag = 1;
+}
+
+void setMotorDirection(enum motorID motor,enum direction spin){
+	if (spin == ccw){
+		PORTD |= ( 1 << motor );
+	}
+	else{
+		PORTD &= ~( 1 << motor );
+	}
 }
 
 void setMotorSpeed(unsigned char intensity, enum motorID motor){

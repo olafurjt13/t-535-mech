@@ -16,7 +16,7 @@
 
 void SPI_MasterInit(void){
 	unsigned char initializingSPI[50] = "Initializing SPI now\0";
-	myPrint(initializingSPI,21);
+	myPrintNL(initializingSPI,21);
 	// set MOSI, SCK and SS as output, all others are inputs.
 	DDR_SPI = ( 1 << SPI_MOSI ) | ( 1 << SPI_SCK ) | ( 1 << SPI_SS );
 

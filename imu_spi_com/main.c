@@ -11,7 +11,10 @@
 #include "IMU_module.h"
 #include "motorControl.h"
 #include "myUSART.h"
+
+// Forbidden stuff!
 //#include <stdio.h>
+//#include <util/delay.h>
 
 #define BAUD 9600
 
@@ -31,36 +34,38 @@ int main(){
 	asm("sei");
 	USART_init(BAUD);
 	IMU_init();
-	motorInit(5);
-	motorInit(6);
+	motorInit(right,3);	// Pin 5
+	motorInit(left,4);	// Pin 6
 
 	int acc_data[3];
-	int gyro_data[3];
+	int angularRate[3];
 	float acc_res = 4.0/65536.0;
 	float gyro_res = 245.0/32768.0;
+	float samplingTime = 0.02520;	// Time between reads, as measured on a scope
 
-	setMotorSpeed(50,right);
-	setMotorSpeed(50,left);
-//	unsigned char speed1[20] = "Motor speed: 100\0";
-//	unsigned char speed2[20] = "Motor speed: 50\0";
-//	unsigned char speed3[20] = "Motor speed: 30\0";
-//	unsigned char speed4[20] = "Motor speed: 10\0";
-	char timerval_right;
-	char timerval_left;
+	//setMotorSpeed(50,right);
+	//setMotorSpeed(50,left);
 
-	unsigned char acceleration[30] = "Acceleration: \0";
-	unsigned char angularRate[30] = "Angular rate: \0";
 	DDRD |= ( 1 << PD3) ;
-	float angular_position;
+	float angularPos = 0;
 	while(1){
 		if(dataReceived){
-			if(calibrationFlag){calibrateIMU();}
+			//if(calibrationFlag){calibrateIMU();}
 
-			PORTD ^= ( 1 << PD3 );
-			readAcc(acc_data,10);
-			readGyro(gyro_data,10);
-
-
+			//readAcc(acc_data,10);
+			readGyro(angularRate,10);
+			angularPos = angularPos + (float)angularRate[1]*gyro_res*samplingTime;
+			//printf("%f", angularPos);
+			USART_Transmit_dec(angularRate[1]);
+			USART_Transmit(0x0A);
+			if(angularPos < -0.5){
+				angularPos = -angularPos;
+				setMotorDirection(right,cw);
+			}
+			else if(angularPos > 0.5){
+				setMotorDirection(right,ccw);
+			}
+			setMotorSpeed((unsigned char)angularPos,right);
 
 
 //			myPrint(acceleration,30);
