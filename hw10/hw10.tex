@@ -106,56 +106,82 @@
 	
 	
 	\section{Storing program parameters between sessions}
-	The way to store program parameters between sessions is to use the \textsc{EEPROM}, which will not get erased when the microcontroller is shut down or is reset.
+	The way to store program parameters between sessions is to use the \textsc{EEPROM}, which will not get erased when the microcontroller is shut down or is reset. Any parameters can be written and reloaded from the \textsc{EEPROM}.
 	
 	
 	\section{Power supply design for an Arduino}
-	A power supply for an Arduino needs to take the main voltage of the household, 220VAC in Europe
+	The Arduino needs  7-12\V DC voltage to operate. For a microcontroller or any such delicate device, it is desirable to have the input voltage as stable as possible. To be able to power the Arduino from the main household power, which is 230\V AC, a power adapting circuit is needed. The following describes a 230\V AC to 9\V DC transformer (9\V because it is in the middle of the desirable input voltage range).
 	
+	\begin{enumerate}
+		\item[Stage 1:]
+		To step the main voltage down, a 230\V AC to 12\V AC transformer is used, it is good to not step the voltage all the way down yet because of possible power loss in the next stages.
+		\item[Stage 2:]
+		Full Bridge Rectification of the AC signal. A diode bridge can be used to rectify the AC signal, single diode rectification is also possible but that means that half of the signal gets lost and the power is not used as efficiently.
+		\item[Stage 3:]
+		After rectification, the signal is still very rapidly changing and a smoothing capacitor is needed to minimize the fluctuations.
+		\item[Stage 4:]
+		Because the world is not perfect and capacitors leak voltage, a voltage regulator is needed to  reduce  ripple voltage and step the DC voltage down to the target 9\V DC. Possible choices for a linear voltage regulator (linear tend to be more accurate, which is what we want) are for example the Farchild LM7809CT 9\V\ regulator with a 2\V\ typical dropout voltage at 1\A\, the Texas Instruments LM2940T-9.0/NOPB with a typical dropout voltage of 0.5\V\ at 1\A\ and only 0.11\V\ at 100\mA . A third choice could be the ST Microelectronics L7809CV which has a dropout voltage of 2\V\ at 1\A\ like the LM7809CT.
+		
+		For this transformer, it is not necessarily required to have a very low dropout voltage. With these three choices, the L7809CV is the most inexpensive so it should be the final choice.
+		\item[Step 5:] A final Low-Pass Filtering is applied to before the output to ensure a stable voltage.
+	\end{enumerate}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{graphics/transformer2}
+		\caption{A 230VAC to 9VDC power adapting circuit}
+		\label{fig:transformer}
+	\end{figure}
 	
 	\pagebreak
 	\section{Progress with my project}
 	
-	\subsection{Last week}
+	\subsection{Last few weeks}
 	
-	
-	
+	These last few weeks have been pivotal in the progress of the project. The SPI communication with the IMU sensor is finally working and from there it was possible to create useful tools for signal processing.
+	Read functions were implemented for acceleration (\verb|readAcc()|) and angular rate (\verb|readGyro()|) data from the IMU that use a moving average filter with variable smoothness to reduce random noise in the signals.
+	The filter is designed essentially as a queue with a finite number of spots $N$, when a new measurement is read, it causes the first measurement to leave the queue to make room, then the average of the $N$ values is taken and returned. This is illustrated in figure~\ref{fig:movingavg}.
+	 
+	 \begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{graphics/movingAvgFilter}
+		\caption{The idea behind the moving average filter. As each new measurement is taken, the oldest measurement is discarded and the new one gets a place in a buffer, the average is then calculated and returned}
+		\label{fig:movingavg}
+	 \end{figure}
+	 
+	  \noindent A calibration function was implemented which integrates the error of each value (X,Y,Z acceleration and angular rate) and then that is subtracted from subsequent measurements from the sensor.
+	  
+	  \noindent Work was initiated on the motor control system which is being simultaneously designed and implemented using the IMU sensor data as its inputs. This will be a focus of next weeks work. 
 
 	\subsection{Next week}
 	
-	\begin{table}[h]
+	\begin{table}[H]
 		\centering
 		\begin{tabular}{llc}
 			\toprule
 			Task no.	&	Task	&	ETC\footnotemark\\
 			\midrule
-			1	&	\begin{tabular}{@{}l@{}}Finish the IMU module\\\end{tabular} &	5 hours \\	
+			1	&	\begin{tabular}{@{}l@{}}Write the PID control loop\\ for the motor control system\\\end{tabular} &	10 hours \\	
 			\midrule	
-			2	&	\begin{tabular}{@{}l@{}}Write the PWM code that uses output compare pins\end{tabular}	&	10 hours\\
+			2	&	\begin{tabular}{@{}l@{}}Integrate the IMU sensor data\\ into the control system\end{tabular}	& 10 hours	\\
 			\midrule
-			3	&	\begin{tabular}{@{}l@{}}Test the accuracy of the\\IMU sensor\end{tabular}	&	5 hours\\
+			3	&	\begin{tabular}{@{}l@{}}Create a PCB for placing all\\ components inside the robot\end{tabular}	& 10 hours\\
 			\midrule
-			4	&		\begin{tabular}{@{}l@{}}Plan the control system and\\start designing at a high level\end{tabular}	&	5 hours\\
+			4	&	\begin{tabular}{@{}l@{}}Design the final look of\\ the robot in CAD/Illustrator\end{tabular}	& 5 hours\\
 			\bottomrule
 		\end{tabular}
 		\label{tab:nextweek}
 	\end{table}
-	
-	
 	\footnotetext{Estimated Time to Complete}
-
+	
 	\subsection{Long term plan}
 	
-	\begin{table}[h]
+	\begin{table}[H]
 		\centering
 		\hspace*{-2cm}
 		\begin{tabular}{lccc}
 			\toprule
 			Week	&	Software design	&	Mechanical design	&	Testing\\
-			\midrule
-			9	&	IMU \& PWM	&	\begin{tabular}{@{}l@{}}Power circuitry\\2nd prototype\end{tabular}	&	\begin{tabular}{@{}l@{}}Estimate power consumption\\PID motor control\end{tabular}\\
-			\midrule
-			10	&	Rethink PID control	&	3D drawing of the robot	&	Power consumption	\\
 			\midrule
 			11	&	\begin{tabular}{@{}l@{}}Integrate IMU, PID\\ and PWM modules\end{tabular}	&	Altium schematics of electronics	&	Integration\\
 			\midrule

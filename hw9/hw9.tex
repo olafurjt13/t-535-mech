@@ -227,9 +227,10 @@
 	
 	\section{Creating negative voltage from a positive power supply}
 	
-	Some devices require a supply voltage $V_{\textsc{cc}}$ as well as the negative of that voltage to operate. Voltage is of course always relative to some reference point and to generate a negative voltage, that reference point, the ground (\textsc{gnd}) needs to be midway between the power supply's highest voltage and lowest voltage.
+	Some devices require a supply voltage $V_{\textsc{cc}}$ as well as the negative of that voltage to operate. Voltage is always measured relative to a reference point called the Ground which should always measure 0\V.
+	A negative voltage is then a potential lower then the Ground.
 	
-	Figure~\ref{fig:negvolt} shows how this new reference point can be created from $V_{\textsc{cc}}$ by using a voltage divider. The output of the buffer becomes a virtual ground and the positive and negative voltages become $V_{\textsc{cc}}/2$ and $-V_{\textsc{cc}}/2$.
+	Figure~\ref{fig:negvolt} shows how a new reference point can be created from a supply voltage by using a voltage divider. The output of the buffer is called a virtual ground and the positive and negative voltages become $V_{\textsc{cc}}/2$ and $-V_{\textsc{cc}}/2$.
 	
 	\begin{figure}[H]
 		\centering
@@ -242,55 +243,7 @@
 	\pagebreak
 	\section{Progress with my project}
 	
-	\subsection{Last week}
-	
-	
-	
-
-	\subsection{Next week}
-	
-	\begin{table}[h]
-		\centering
-		\begin{tabular}{llc}
-			\toprule
-			Task no.	&	Task	&	ETC\footnotemark\\
-			\midrule
-			1	&	\begin{tabular}{@{}l@{}}Finish the IMU module\\\end{tabular} &	5 hours \\	
-			\midrule	
-			2	&	\begin{tabular}{@{}l@{}}Write the PWM code that uses output compare pins\end{tabular}	&	10 hours\\
-			\midrule
-			3	&	\begin{tabular}{@{}l@{}}Test the accuracy of the\\IMU sensor\end{tabular}	&	5 hours\\
-			\midrule
-			4	&		\begin{tabular}{@{}l@{}}Plan the control system and\\start designing at a high level\end{tabular}	&	5 hours\\
-			\bottomrule
-		\end{tabular}
-		\label{tab:nextweek}
-	\end{table}
-	
-	
-	\footnotetext{Estimated Time to Complete}
-
-	\subsection{Long term plan}
-	
-	\begin{table}[h]
-		\centering
-		\hspace*{-2cm}
-		\begin{tabular}{lccc}
-			\toprule
-			Week	&	Software design	&	Mechanical design	&	Testing\\
-			\midrule
-			9	&	IMU \& PWM	&	\begin{tabular}{@{}l@{}}Power circuitry\\2nd prototype\end{tabular}	&	\begin{tabular}{@{}l@{}}Estimate power consumption\\PID motor control\end{tabular}\\
-			\midrule
-			10	&	Rethink PID control	&	3D drawing of the robot	&	Power consumption	\\
-			\midrule
-			11	&	\begin{tabular}{@{}l@{}}Integrate IMU, PID\\ and PWM modules\end{tabular}	&	Altium schematics of electronics	&	Integration\\
-			\midrule
-			12	&	Integration	&	Integration	&	Integration	\\
-			\bottomrule
-		\end{tabular}
-		\label{tab:longterm}
-		\hspace*{-2cm}
-	\end{table}
+	See homework 10.
 	
 	
 	
