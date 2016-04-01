@@ -20,7 +20,11 @@ void readAcc(int *dataBuff,char smoothness);
 void readGyro(int *dataBuff,char smoothness);
 void calibrateIMU();
 
+
 // Calibration flag for interrupt
 unsigned char calibrationFlag;
+
+// Estimated first derivative of the angular rate
+int gyroCalDerivative[3];
 
 #endif /* IMU_MODULE_H_ */

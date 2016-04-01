@@ -69,20 +69,25 @@ unsigned char accBufferIndexer = 0;
 unsigned char gyroBufferIndexer = 0;
 
 // Calibration variables for the gyro and accelerometer
-int accCalibration[3] = {0,0,0};
-int gyroCalibration[3] = {0,0,0};
+int accCalOffset[3] = {0,0,0};
+int gyroCalOffset[3] = {0,0,0};
 
-// Debounce counter variable
+// Debounce variables
 unsigned char debounceCounter = 0;
+unsigned char idle = 0;
+unsigned char idleCounter = 0;
+char lastReading = 0;
 
 
 void IMU_init(){
 	calibrationFlag = 0;
 
 	SPI_MasterInit();
-	if (whoami() != 0x68){
+	char identification = whoami();
+	if (identification != 0x68){
 			unsigned char errStr[30] = "Error connecting to IMU!\0";
-			myPrintNL(errStr,10);
+			myPrintNL(errStr,30);
+			USART_Transmit_8_hex(whoami());
 	}
 	accInit();
 	gyroInit();
@@ -96,8 +101,8 @@ void debounceTimerInit(){
 	// Enable Output Compare Match Interrupt
 	TIMSK1 |= ( 1 << OCIE1B );
 	// Clearing interrupt flags (writing 1 to them => clearing)
-	//TIFR1 = ( 1 << OCF1B );
-	// Set the output compare to 16000 => 1ms with 1/8t prescaling
+	TIFR1 = ( 1 << OCF1B );
+	// Set the output compare to 2000 => 1ms with 1/8t prescaling
 	OCR1B |= 2000;
 	// Set the clock to 1/8th prescaling
 	TCCR1B |= ( 1 << CS11 );
@@ -106,19 +111,15 @@ void debounceTimerInit(){
 void accInit(){
 	// The bit pattern to turn on acceleration sensing in the Z,Y and X directions
 	char setCtrlReg5 = ( 1 << ACC_Z ) | ( 1 << ACC_Y ) | ( 1 << ACC_X );
-
 	// Send write address
 	SPI_Initiate_Transmission();
 	SPI_MasterTransmit( WRITE | CTRL_REG5_XL );
-
-
 	// Send ctrlReg5 bit pattern to turn on X,Y,Z acceleration sensors
 	SPI_MasterTransmit( setCtrlReg5 );
 	SPI_End_Transmission();
 
 
 	char setCtrlReg8 = ( 1 << IF_ADD_INC );
-
 	// Send write address
 	SPI_Initiate_Transmission();
 		SPI_MasterTransmit( WRITE | CTRL_REG8 );
@@ -126,13 +127,21 @@ void accInit(){
 		SPI_MasterTransmit( setCtrlReg8 );
 	SPI_End_Transmission();
 
+	SPI_Initiate_Transmission();
+		SPI_MasterTransmit( READ | CTRL_REG8 );
+		SPI_MasterTransmit(0x00);
+	SPI_End_Transmission();
+
+
 	// Set output data rate to 952Hz
 	char setCtrlReg6 = ( 1 << ODR_XL2 ) | ( 1 << ODR_XL1 );
-
 	SPI_Initiate_Transmission();
 		SPI_MasterTransmit ( WRITE | CTRL_REG6_XL );
 		SPI_MasterTransmit ( setCtrlReg6 );
 	SPI_End_Transmission();
+
+	unsigned char message[20] = "ACC initialized\0";
+	myPrintNL(message,20);
 }
 
 
@@ -145,6 +154,8 @@ void gyroInit(){
 		SPI_MasterTransmit ( setCtrlReg1 );
 	SPI_End_Transmission();
 
+	unsigned char message[20] = "GYRO initialized\0";
+	myPrintNL(message,20);
 }
 
 /*
@@ -152,35 +163,45 @@ void gyroInit(){
  * For this to work, the IMU must be completely stable
  */
 
+
 void calibrateIMU(){
 	int accBuffer[3];
 	int gyroBuffer[3];
 
 	// Using temporary long variables to reserve space, don't need long to store the resulting variable, only intermediately
-	long accCalibration_TMP[3] = {0,0,0};
-	long gyroCalibration_TMP[3] = {0,0,0};
+	long accCalOffset_TMP[3] = {0,0,0};
+	long gyroCalOffset_TMP[3] = {0,0,0};
+	int lastGyroVal[3];
 
 	IMU_read_acc(accBuffer);
 	IMU_read_gyro(gyroBuffer);
 	for(unsigned char i = 0; i < 3; i++){
-		accCalibration[i] = accBuffer[i];
-		gyroCalibration[i] = gyroBuffer[i];
-	}
+		accCalOffset_TMP[i] = accBuffer[i];
+		gyroCalOffset_TMP[i] = gyroBuffer[i];
 
+		gyroCalDerivative[i] = 0;
+		lastGyroVal[i] = gyroBuffer[i];
+	}
+	// Calulating the cumulative average of 1000 data points
 	for (unsigned int i = 0; i < 1000; i++){
 		IMU_read_acc(accBuffer);
 		IMU_read_gyro(gyroBuffer);
 		for(unsigned char j = 0; j < 3; j++){
-			accCalibration_TMP[j] = (accBuffer[j] + (i+1)*accCalibration_TMP[j])/(i+2);
-			gyroCalibration_TMP[j] = (gyroBuffer[j] + (i+1)*gyroCalibration_TMP[j])/(i+2);
+			accCalOffset_TMP[j] = (accBuffer[j] + (i+1)*accCalOffset_TMP[j])/(i+2);
+			gyroCalOffset_TMP[j] = (gyroBuffer[j] + (i+1)*gyroCalOffset_TMP[j])/(i+2);
+
+			gyroCalDerivative[j] = ((gyroBuffer[j] - lastGyroVal[j]) + (i+1)*gyroCalDerivative[j])/(i+2);
+			lastGyroVal[j] = gyroBuffer[j];
 		}
 	}
 	for(unsigned char i = 0; i < 3; i++){
-		accCalibration[i] = accCalibration_TMP[i];
-		gyroCalibration[i] = gyroCalibration_TMP[i];
+		accCalOffset[i] = accCalOffset_TMP[i];
+		gyroCalOffset[i] = gyroCalOffset_TMP[i];
 	}
 	// Calibration done
 	calibrationFlag = 0;
+	unsigned char message[25] = "Calibration Done\0";
+	myPrintNL(message,20);
 }
 
 /*
@@ -211,9 +232,9 @@ void readAcc(int *dataBuff,char smoothness){
 		accBufferIndexer = accBufferIndexer + 1;
 		if (accBufferIndexer == (smoothness - 1)){accBufferIndexer = 0;} // Reset the bufferIndexer
 
-		dataBuff[0] = sum(accX_rawDataBuffer,smoothness)/smoothness - accCalibration[0];
-		dataBuff[1] = sum(accY_rawDataBuffer,smoothness)/smoothness - accCalibration[1];
-		dataBuff[2] = sum(accZ_rawDataBuffer,smoothness)/smoothness - (accCalibration[2] - 16384);
+		dataBuff[0] = sum(accX_rawDataBuffer,smoothness)/smoothness - accCalOffset[0];
+		dataBuff[1] = sum(accY_rawDataBuffer,smoothness)/smoothness - accCalOffset[1];
+		dataBuff[2] = sum(accZ_rawDataBuffer,smoothness)/smoothness - (accCalOffset[2] - 16384);
 	}
 }
 
@@ -244,9 +265,9 @@ void readGyro(int *dataBuff,char smoothness){
 		gyroBufferIndexer = gyroBufferIndexer + 1;
 		if (gyroBufferIndexer == (smoothness - 1)){gyroBufferIndexer = 0;} // Reset the bufferIndexer
 
-		dataBuff[0] = sum(gyroX_rawDataBuffer,smoothness)/smoothness - gyroCalibration[0];
-		dataBuff[1] = sum(gyroY_rawDataBuffer,smoothness)/smoothness - gyroCalibration[1];
-		dataBuff[2] = sum(gyroZ_rawDataBuffer,smoothness)/smoothness - gyroCalibration[2];
+		dataBuff[0] = sum(gyroX_rawDataBuffer,smoothness)/smoothness - gyroCalOffset[0];
+		dataBuff[1] = sum(gyroY_rawDataBuffer,smoothness)/smoothness - gyroCalOffset[1];
+		dataBuff[2] = sum(gyroZ_rawDataBuffer,smoothness)/smoothness - gyroCalOffset[2];
 	}
 }
 
@@ -319,18 +340,27 @@ char whoami(void){
 }
 
 ISR(TIMER1_COMPB_vect){
-	TCNT1L = 0;
-	TCNT1H = 0;
-//	if( PIND & ( 1 << PD2 )){
-//		debounceCounter++;
-//	}
-//	else{
-//		debounceCounter = 0;
-//	}
-//
-//	if (debounceCounter > 49){
-//		calibrationFlag = 1;
-//		debounceCounter = 0;
-//	}
-	PORTD ^= ( 1 << PD3 );
+	asm("cli");
+	OCR1B += 2000;
+	if(idle){
+		if(idleCounter > 200){idle = 0;}
+		idleCounter++;
+	}
+	else{
+		char reading = PIND & ( 1 << PD2);
+			if( reading != lastReading ){
+				debounceCounter = 0;
+			}
+			else if(reading ==  ( 1 << PD2 )){
+				debounceCounter++;
+			}
+			if (debounceCounter > 50){
+				calibrationFlag = 1;
+				idle = 1;
+				idleCounter = 0;
+				debounceCounter = 0;
+			}
+			lastReading = reading;
+	}
+	asm("sei");
 }
