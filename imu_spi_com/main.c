@@ -60,13 +60,15 @@ int main(){
 	DDRC |= ( 1 << PC1 );
 	unsigned int currentTime = 0;
 	unsigned int previousTime = 0;
+	unsigned char begin = 0;
 
 	while(1){
-		if(dataReceived){
 			if(calibrationFlag){
 				calibrateIMU();
 				angularPos = 0.0;
+				begin = 1;
 			}
+			if(begin){
 			//readAcc(acc_data,10);
 			readGyro(angularRate,10);
 
@@ -81,6 +83,7 @@ int main(){
 				}
 			previousTime = currentTime;
 
+			// Integrate the angular rate to get angular position
 			angularPos = angularPos + (float)angularRate[1]*gyro_res*samplingTime;
 			error = setReference - angularPos;
 			integralError = integralError + error*samplingTime;
@@ -88,14 +91,15 @@ int main(){
 			previousError = error;
 
 			output = Kp*error + Kd*derivativeError + Ki*integralError;
+
 			if(output < 0){
 				output = -output;
-				setMotorDirection(right,ccw);
-				setMotorDirection(left,cw);
-			}
-			else{
 				setMotorDirection(right,cw);
 				setMotorDirection(left,ccw);
+			}
+			else{
+				setMotorDirection(right,ccw);
+				setMotorDirection(left,cw);
 			}
 
 			setMotorSpeed((unsigned char)(output),right);

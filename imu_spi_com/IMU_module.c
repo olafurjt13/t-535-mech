@@ -313,8 +313,6 @@ void IMU_read_gyro(int *gyroBuffer){
 	// Select the IMU as an SPI Slave
 
 	SPI_Initiate_Transmission();
-
-
 	// Send "read from acceleration output register" signal
 	SPI_MasterTransmit( READ | OUT_X_G );
 	for (unsigned char i = 0; i < 6; i++){

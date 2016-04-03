@@ -12,7 +12,7 @@
 enum motorID
 {
 	right = 5,
-	left,
+	left = 6,
 };
 
 enum direction
