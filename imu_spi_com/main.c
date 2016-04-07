@@ -42,26 +42,34 @@ int main(){
 	float acc_res = 4.0/65536.0;
 	float gyro_res = 245.0/32768.0;
 
-	float samplingTime = 0.045;	// Time between reads, as measured on a scope
+	float dt = 0.045;	// Time between reads, as measured on a scope
 
-	//setMotorSpeed(50,right);
-	//setMotorSpeed(50,left);
 
 	float angularPos = 0.0;
 	float setReference = 0.0;
 	float error;
-	char Kp = 1;
-	char Ki = 0.001;
+	char Kp = 10;
+	char Ki = 0.005;
 	char Kd = 0.001;
 	float derivativeError = 0;
 	float integralError = 0;
 	float previousError = 0;
+	float robotHeight = 0.144;
 	float output;
-	DDRC |= ( 1 << PC1 );
 	unsigned int currentTime = 0;
 	unsigned int previousTime = 0;
 	unsigned char begin = 0;
 
+	// Debouncing the angular Rate sensor
+	unsigned char angRatePositive = 0;
+	unsigned char angRateNegative = 0;
+	int angularThreshold = 20;
+
+	// Variables to allow accelerometer to check if it's time to reset the angularPos variable
+	unsigned char lowAccCounter = 0;
+
+
+	DDRC |= ( 1 << PC1 );
 	while(1){
 			if(calibrationFlag){
 				calibrateIMU();
@@ -69,42 +77,75 @@ int main(){
 				begin = 1;
 			}
 			if(begin){
-			//readAcc(acc_data,10);
-			readGyro(angularRate,10);
+			readAcc(acc_data,20);
+			readGyro(angularRate,20);
+
+			PORTC ^= ( 1 << PC1 );
 
 			// Calculate the time since last measurement
-			PORTC ^= ( 1 << PC1 );
 			currentTime = TCNT1;
 				if (currentTime < previousTime){
-					samplingTime = (0xFF -  (previousTime - currentTime))*0.0000005;
+					dt = (0xFF -  (previousTime - currentTime))*0.000004;
 				}
 				else{
-					samplingTime = (currentTime - previousTime)*(0.0000005);
+					dt = (currentTime - previousTime)*(0.000004);
 				}
 			previousTime = currentTime;
 
-			// Integrate the angular rate to get angular position
-			angularPos = angularPos + (float)angularRate[1]*gyro_res*samplingTime;
-			error = setReference - angularPos;
-			integralError = integralError + error*samplingTime;
-			derivativeError = (error - previousError)/samplingTime;
-			previousError = error;
-
-			output = Kp*error + Kd*derivativeError + Ki*integralError;
-
-			if(output < 0){
-				output = -output;
-				setMotorDirection(right,cw);
-				setMotorDirection(left,ccw);
+			if(angularRate[1] > 0){
+				angRatePositive += 1;
+				angRateNegative = 0;
 			}
 			else{
-				setMotorDirection(right,ccw);
-				setMotorDirection(left,cw);
+				angRateNegative += 1;
+				angRatePositive = 0;
 			}
 
-			setMotorSpeed((unsigned char)(output),right);
-			setMotorSpeed((unsigned char)(output),left);
-		}
+			if ((
+				(angRatePositive > 10) | (angRateNegative > 10)) &
+				((angularRate[1] > angularThreshold) |
+				(angularRate[1] < -angularThreshold)))
+			{
+				// Integrate the angular rate to get angular position
+				angularPos = angularPos + (float)angularRate[1]*gyro_res*dt	;
+
+				if(angularPos > 4.0){
+					if ((acc_data[2] < 1638) & (acc_data[2] > -1638)){	// Z acceleration < +-0.1g
+						lowAccCounter += 1;
+					}
+					if (lowAccCounter > 100){
+						angularPos = 0.0;
+					}
+				}
+				else{
+					lowAccCounter = 0;
+				}
+				// PID controller
+				error = setReference - angularPos;
+				integralError = integralError + error*dt;
+				derivativeError = (error - previousError)/dt;
+				previousError = error;
+
+				output = Kp*error + Kd*derivativeError + Ki*integralError;
+
+				if(output < 0){
+					output = -output;
+					setMotorDirection(right,cw);
+					setMotorDirection(left,ccw);
+				}
+				else{
+					setMotorDirection(right,ccw);
+					setMotorDirection(left,cw);
+				}
+
+				setMotorSpeed((unsigned char)(output),right);
+				setMotorSpeed((unsigned char)(output),left);
+
+				USART_Transmit_dec((int)output);
+				USART_Transmit(0x0A);
+
+			}
+			}
 	}
 	return 0;
 }

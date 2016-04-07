@@ -52,13 +52,13 @@ void setMotorDirection(enum motorID motor,enum direction spin){
 }
 
 void setMotorSpeed(unsigned char intensity, enum motorID motor){
-	if (intensity > 100){intensity = 100;};
+	if (intensity > 255){intensity = 255;};
 	if (intensity < 0){intensity = 0;};
 	if (motor == right){
-		OCR0B = ((100 - intensity)*255)/100;
+		OCR0B = intensity;//((100 - intensity)*255)/100;
 	}
 	else if (motor == left){
-		OCR0A = ((100 - intensity)*255)/100;
+		OCR0A = intensity;//((100 - intensity)*255)/100;
 	}
 
 }

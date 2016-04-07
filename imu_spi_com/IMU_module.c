@@ -52,13 +52,13 @@ void debounceTimerInit();
 
 
 // Reserving space for the moving average filter to store data between calls
-int accX_rawDataBuffer[10];
-int accY_rawDataBuffer[10];
-int accZ_rawDataBuffer[10];
+int accX_rawDataBuffer[20];
+int accY_rawDataBuffer[20];
+int accZ_rawDataBuffer[20];
 
-int gyroX_rawDataBuffer[10];
-int gyroY_rawDataBuffer[10];
-int gyroZ_rawDataBuffer[10];
+int gyroX_rawDataBuffer[20];
+int gyroY_rawDataBuffer[20];
+int gyroZ_rawDataBuffer[20];
 
 // Flag to let the MAF know if it needs to accumulate data, defaults to true
 unsigned char accumulatingAcc = 1;
@@ -102,10 +102,10 @@ void debounceTimerInit(){
 	TIMSK1 |= ( 1 << OCIE1B );
 	// Clearing interrupt flags (writing 1 to them => clearing)
 	TIFR1 = ( 1 << OCF1B );
-	// Set the output compare to 2000 => 1ms with 1/8t prescaling
-	OCR1B |= 2000;
-	// Set the clock to 1/8th prescaling
-	TCCR1B |= ( 1 << CS11 );
+	// Set the output compare to 250 => 1ms with 1/64t prescaling
+	OCR1B |= 250;
+	// Set the clock to 1/64th prescaling
+	TCCR1B |= ( 1 << CS11 ) | ( 1 << CS10 );
 }
 
 void accInit(){
@@ -170,33 +170,38 @@ void calibrateIMU(){
 
 	// Using temporary long variables to reserve space, don't need long to store the resulting variable, only intermediately
 	long accCalOffset_TMP[3] = {0,0,0};
-	long gyroCalOffset_TMP[3] = {0,0,0};
-	int lastGyroVal[3];
+	long gyroCalOffset_TMP[3];
 
 	IMU_read_acc(accBuffer);
 	IMU_read_gyro(gyroBuffer);
 	for(unsigned char i = 0; i < 3; i++){
 		accCalOffset_TMP[i] = accBuffer[i];
 		gyroCalOffset_TMP[i] = gyroBuffer[i];
-
-		gyroCalDerivative[i] = 0;
-		lastGyroVal[i] = gyroBuffer[i];
 	}
 	// Calulating the cumulative average of 1000 data points
 	for (unsigned int i = 0; i < 1000; i++){
 		IMU_read_acc(accBuffer);
-		IMU_read_gyro(gyroBuffer);
 		for(unsigned char j = 0; j < 3; j++){
 			accCalOffset_TMP[j] = (accBuffer[j] + (i+1)*accCalOffset_TMP[j])/(i+2);
-			gyroCalOffset_TMP[j] = (gyroBuffer[j] + (i+1)*gyroCalOffset_TMP[j])/(i+2);
-
-			gyroCalDerivative[j] = ((gyroBuffer[j] - lastGyroVal[j]) + (i+1)*gyroCalDerivative[j])/(i+2);
-			lastGyroVal[j] = gyroBuffer[j];
 		}
 	}
+	for (unsigned char i = 0; i < 100; i++){
+			IMU_read_gyro(gyroBuffer);
+			for (unsigned char j = 0; j < 3; j++){
+				gyroCalOffset_TMP[j] = (gyroBuffer[j] + (i+1)*gyroCalOffset_TMP[j])/(i+2);
+
+			}
+		}
 	for(unsigned char i = 0; i < 3; i++){
-		accCalOffset[i] = accCalOffset_TMP[i];
-		gyroCalOffset[i] = gyroCalOffset_TMP[i];
+		// The x axis should be in line with gravity when calibration is performed
+		if(i == 0){
+			accCalOffset[i] = accCalOffset_TMP[i] + 16384;
+			gyroCalOffset[i] = gyroCalOffset_TMP[i];
+		}
+		else{
+			accCalOffset[i] = accCalOffset_TMP[i];
+			gyroCalOffset[i] = gyroCalOffset_TMP[i];
+		}
 	}
 	// Calibration done
 	calibrationFlag = 0;
@@ -234,7 +239,7 @@ void readAcc(int *dataBuff,char smoothness){
 
 		dataBuff[0] = sum(accX_rawDataBuffer,smoothness)/smoothness - accCalOffset[0];
 		dataBuff[1] = sum(accY_rawDataBuffer,smoothness)/smoothness - accCalOffset[1];
-		dataBuff[2] = sum(accZ_rawDataBuffer,smoothness)/smoothness - (accCalOffset[2] - 16384);
+		dataBuff[2] = sum(accZ_rawDataBuffer,smoothness)/smoothness - accCalOffset[2];
 	}
 }
 
@@ -313,7 +318,7 @@ void IMU_read_gyro(int *gyroBuffer){
 	// Select the IMU as an SPI Slave
 
 	SPI_Initiate_Transmission();
-	// Send "read from acceleration output register" signal
+	// Send "read from gyroscope output register" signal
 	SPI_MasterTransmit( READ | OUT_X_G );
 	for (unsigned char i = 0; i < 6; i++){
 			spiBuffer[i] = SPI_MasterTransmit(0x00);
@@ -339,7 +344,7 @@ char whoami(void){
 
 ISR(TIMER1_COMPB_vect){
 	asm("cli");
-	OCR1B += 2000;
+	OCR1B += 250;
 	if(idle){
 		if(idleCounter > 200){idle = 0;}
 		idleCounter++;
